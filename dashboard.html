@@ -65,7 +65,7 @@
 </head>
 <body>
     <div class="container">
-        <div class="header">Good Morning 🌅</div>
+        <div class="header" id="greeting">Good Morning 🌅, <span id="username"></span></div>
         <div class="quote-box"><i>"Hard work beats talent when talent doesn’t work hard."</i></div>
         <div class="progress-bar"><div class="progress"></div></div>
         <div class="grid">
@@ -75,5 +75,26 @@
             <button>📜 Past Papers</button>
         </div>
     </div>
+    
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            function getGreeting() {
+                const hour = new Date().getHours();
+                if (hour < 12) return "Good Morning 🌅";
+                if (hour < 18) return "Good Afternoon ☀️";
+                if (hour < 21) return "Good Evening 🌆";
+                return "Good Night 🌙";
+            }
+
+            const username = localStorage.getItem("vidyutUsername") || "User";
+            const greetingElement = document.getElementById("greeting");
+            const usernameElement = document.getElementById("username");
+            
+            if (greetingElement && usernameElement) {
+                greetingElement.innerHTML = `${getGreeting()}, ${username}`;
+                usernameElement.textContent = username;
+            }
+        });
+    </script>
 </body>
 </html>
