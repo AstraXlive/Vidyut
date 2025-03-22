@@ -99,10 +99,12 @@
 
             localStorage.setItem("installPromptCount", installCount);
 
-            // Show the install button
+            // Show the install button in the upper right corner with no box styling
             let installBtn = document.createElement("button");
-            installBtn.innerText = "📲 Install Vidyut App";
-            installBtn.style = "position: fixed; bottom: 20px; padding: 10px 20px; background: #ffd700; border: none; color: #121212; border-radius: 5px; cursor: pointer;";
+            installBtn.innerText = "Install Vidyut";
+            installBtn.style = "position: fixed; top: 15px; right: 15px; font-size: 0.9rem; color: #ffffff; background: none; border: none; cursor: pointer; text-decoration: underline; opacity: 0.8; transition: opacity 0.3s ease;";
+            installBtn.onmouseover = () => installBtn.style.opacity = "1";
+            installBtn.onmouseout = () => installBtn.style.opacity = "0.8";
             installBtn.onclick = () => {
                 deferredPrompt.prompt();
                 deferredPrompt.userChoice.then((choiceResult) => {
