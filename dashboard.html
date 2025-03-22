@@ -3,81 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vidyut ⚡ - Dashboard</title>
+    <title>Vidyut ⚡ Dashboard</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
-
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             font-family: 'Inter', sans-serif;
         }
-
         body {
             background-color: #121212;
             color: #ffffff;
+            text-align: center;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             height: 100vh;
-            text-align: center;
         }
-
         .container {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 2rem;
-            border-radius: 10px;
-            width: 80%;
-            max-width: 600px;
+            width: 90%;
+            max-width: 400px;
         }
-
-        h1 {
+        .header {
             font-size: 2rem;
-            margin-bottom: 1rem;
+            font-weight: 600;
         }
-
-        .tools {
-            margin-top: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .tool {
-            background: rgba(255, 255, 255, 0.2);
+        .quote-box {
+            background: #222;
             padding: 15px;
-            border-radius: 5px;
-            font-size: 1.2rem;
-            cursor: pointer;
-            transition: background 0.2s;
+            border-radius: 10px;
+            margin-top: 10px;
         }
-
-        .tool:hover {
-            background: rgba(255, 255, 255, 0.3);
+        .progress-bar {
+            background: #333;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        .progress {
+            height: 10px;
+            background: gold;
+            width: 70%;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .grid button {
+            background: gold;
+            padding: 10px;
+            border-radius: 5px;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Welcome, <span id="username"></span> 👋</h1>
-        <p>Select a tool to boost your JEE prep:</p>
-        <div class="tools">
-            <div class="tool" onclick="alert('Coming soon!')">📚 Study Planner</div>
-            <div class="tool" onclick="alert('Coming soon!')">📝 Practice Questions</div>
-            <div class="tool" onclick="alert('Coming soon!')">📊 Performance Tracker</div>
-            <div class="tool" onclick="window.location.href='settings.html'">⚙ Settings</div>
+        <div class="header">Good Morning 🌅</div>
+        <div class="quote-box"><i>"Hard work beats talent when talent doesn’t work hard."</i></div>
+        <div class="progress-bar"><div class="progress"></div></div>
+        <div class="grid">
+            <button>📖 Study Timer</button>
+            <button>📝 Practice</button>
+            <button>🧠 Mock Tests</button>
+            <button>📜 Past Papers</button>
         </div>
     </div>
-
-    <script>
-        const username = localStorage.getItem("vidyutUsername");
-        if (!username) {
-            window.location.href = "index.html"; // Redirect if not logged in
-        } else {
-            document.getElementById("username").innerText = username;
-        }
-    </script>
 </body>
 </html>
