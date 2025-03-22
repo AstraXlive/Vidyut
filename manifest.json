@@ -4,8 +4,8 @@
   "description": "A powerful study companion for JEE aspirants.",
   "start_url": "index.html",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#000000",
+  "background_color": "#121212",
+  "theme_color": "#121212",
   "icons": [
     {
       "src": "maskable_icon_x512.png",
