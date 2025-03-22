@@ -135,8 +135,7 @@
                 await setDoc(userRef, {
                     password: hashedPassword,
                     joinedAt: new Date().toISOString()
-                });
-                alert("✅ Account created successfully!");
+                });       
             } else {
                 const userData = userDoc.data();
                 if (userData.password !== hashedPassword) {
