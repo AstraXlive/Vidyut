@@ -61,12 +61,63 @@
             border: none;
             cursor: pointer;
         }
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            background: #222;
+            padding: 10px 0;
+        }
+        .bottom-nav button {
+            background: none;
+            color: white;
+            border: none;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+        .hamburger {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        .menu {
+            position: fixed;
+            left: -250px;
+            top: 0;
+            width: 250px;
+            height: 100%;
+            background: #333;
+            padding-top: 50px;
+            transition: 0.3s;
+        }
+        .menu a {
+            display: block;
+            padding: 10px;
+            color: white;
+            text-decoration: none;
+            text-align: left;
+        }
+        .menu a:hover {
+            background: #444;
+        }
     </style>
 </head>
 <body>
+    <span class="hamburger" onclick="toggleMenu()">☰</span>
+    <div class="menu" id="menu">
+        <a href="#">📚 Study Planner</a>
+        <a href="#">⚙ Settings</a>
+        <a href="#">ℹ About</a>
+        <a href="#">🚪 Logout</a>
+    </div>
+
     <div class="container">
         <div class="header" id="greeting">Good Morning 🌅, <span id="username"></span></div>
-        <div class="quote-box"><i>"Hard work beats talent when talent doesn’t work hard."</i></div>
+        <div class="quote-box" id="quote-box"><i>"Loading quote..."</i></div>
         <div class="progress-bar"><div class="progress"></div></div>
         <div class="grid">
             <button>📖 Study Timer</button>
@@ -76,25 +127,45 @@
         </div>
     </div>
     
+    <nav class="bottom-nav">
+        <button>🏠 Home</button>
+        <button>📝 Practice</button>
+        <button>🛠 Tools</button>
+        <button>📺 Watch</button>
+    </nav>
+    
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            function getGreeting() {
-                const hour = new Date().getHours();
-                if (hour < 12) return "Good Morning 🌅";
-                if (hour < 18) return "Good Afternoon ☀️";
-                if (hour < 21) return "Good Evening 🌆";
-                return "Good Night 🌙";
+        document.addEventListener("DOMContentLoaded", async function() {
+            async function fetchQuote() {
+                try {
+                    const response = await fetch("https://api.quotable.io/random?tags=education");
+                    const data = await response.json();
+                    document.getElementById("quote-box").innerHTML = `<i>"${data.content}"</i> - ${data.author}`;
+                } catch (error) {
+                    console.error("Quote API failed, using fallback.");
+                    useFallbackQuote();
+                }
             }
 
-            const username = localStorage.getItem("vidyutUsername") || "User";
-            const greetingElement = document.getElementById("greeting");
-            const usernameElement = document.getElementById("username");
-            
-            if (greetingElement && usernameElement) {
-                greetingElement.innerHTML = `${getGreeting()}, ${username}`;
-                usernameElement.textContent = username;
+            function useFallbackQuote() {
+                const fallbackQuotes = [
+                    "Education is the most powerful weapon which you can use to change the world. - Nelson Mandela",
+                    "Live as if you were to die tomorrow. Learn as if you were to live forever. - Mahatma Gandhi",
+                    "An investment in knowledge pays the best interest. - Benjamin Franklin",
+                    "Education is not preparation for life; education is life itself. - John Dewey",
+                    "Strive for progress, not perfection. - Unknown"
+                ];
+                const randomQuote = fallbackQuotes[Math.floor(Math.random() * fallbackQuotes.length)];
+                document.getElementById("quote-box").innerHTML = `<i>"${randomQuote}"</i>`;
             }
+
+            fetchQuote();
         });
+
+        function toggleMenu() {
+            const menu = document.getElementById("menu");
+            menu.style.left = menu.style.left === "0px" ? "-250px" : "0px";
+        }
     </script>
 </body>
 </html>
