@@ -91,80 +91,57 @@
     
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getFirestore, doc, setDoc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+       import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyBK6ERxBeqllVW70VwMYs5Pss9oMGhShX8",
-            authDomain: "vidyut-b88c5.firebaseapp.com",
-            projectId: "vidyut-b88c5",
-            storageBucket: "vidyut-b88c5.firebasestorage.app",
-            messagingSenderId: "552051945759",
-            appId: "1:552051945759:web:79038ee244d63ba38bc02a"
-        };
+// Hash function (simple SHA-256)
+async function hashPassword(password) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(password);
+    const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+    return Array.from(new Uint8Array(hashBuffer))
+        .map(b => b.toString(16).padStart(2, "0"))
+        .join("");
+}
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+async function login() {
+    let username = document.getElementById("username").value.trim();
+    let password = document.getElementById("password").value.trim();
+    let loginButton = document.getElementById("login-button");
 
-        function getDeviceID() {
-            let deviceID = localStorage.getItem("vidyutDeviceID");
-            if (!deviceID) {
-                deviceID = crypto.randomUUID();
-                localStorage.setItem("vidyutDeviceID", deviceID);
-            }
-            return deviceID;
+    if (!username || !password) {
+        alert("⚠ Please enter both username and password!");
+        return;
+    }
+
+    loginButton.innerText = "Checking... ⏳";
+    loginButton.disabled = true;
+
+    const userRef = doc(db, "users", username);
+    const userDoc = await getDoc(userRef);
+    const hashedPassword = await hashPassword(password);
+
+    if (!userDoc.exists()) {
+        // New user, create account
+        await setDoc(userRef, {
+            password: hashedPassword, // Store hashed password
+            joinedAt: new Date().toISOString()
+        });
+        alert("✅ Account created successfully!");
+    } else {
+        const userData = userDoc.data();
+        if (userData.password !== hashedPassword) {
+            alert("❌ Incorrect password!");
+            loginButton.innerText = "Continue";
+            loginButton.disabled = false;
+            return;
         }
+    }
 
-        async function login() {
-            let username = document.getElementById("username").value.trim();
-            let loginButton = document.getElementById("login-button");
+    localStorage.setItem("vidyutUsername", username);
+    window.location.href = "dashboard.html";
+}
+document.getElementById("login-button").addEventListener("click", login);
 
-            if (!username) {
-                alert("⚠ Please enter a username!");
-                return;
-            }
-
-            loginButton.innerText = "Checking... ⏳";
-            loginButton.disabled = true;
-
-            const userRef = doc(db, "users", username);
-            const userDoc = await getDoc(userRef);
-            const deviceID = getDeviceID();
-
-            if (!userDoc.exists()) {
-                // New user, create account with this device approved
-                await setDoc(userRef, {
-                    joinedAt: new Date().toISOString(),
-                    devices: { [deviceID]: true }
-                });
-            } else {
-                const userData = userDoc.data();
-
-                // If user has device list and current device is already approved
-                if (userData.devices && userData.devices[deviceID]) {
-                    localStorage.setItem("vidyutUsername", username);
-                    window.location.href = "dashboard.html";
-                    return;
-                }
-
-                // If new device, ask for approval
-                const approval = confirm(`New device detected! Approve login for ${username}?`);
-                if (!approval) {
-                    loginButton.innerText = "Continue";
-                    loginButton.disabled = false;
-                    return;
-                }
-
-                // Save new device as approved
-                await updateDoc(userRef, {
-                    [`devices.${deviceID}`]: true
-                });
-            }
-
-            localStorage.setItem("vidyutUsername", username);
-            window.location.href = "dashboard.html";
-        }
-
-        document.getElementById("login-button").addEventListener("click", login);
     </script>
 </body>
 </html>
