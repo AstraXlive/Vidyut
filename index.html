@@ -68,6 +68,24 @@
             box-shadow: 0px 5px 15px rgba(255, 215, 0, 0.5);
         }
 
+        .install-btn {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            font-size: 0.9rem;
+            color: #ffffff;
+            background: none;
+            border: none;
+            cursor: pointer;
+            text-decoration: underline;
+            opacity: 0.8;
+            transition: opacity 0.3s ease;
+        }
+
+        .install-btn:hover {
+            opacity: 1;
+        }
+
         @keyframes fadeIn {
             from {
                 opacity: 0;
@@ -87,40 +105,35 @@
 
     <script>
         let deferredPrompt;
-        let installCount = localStorage.getItem("installPromptCount") || 0;
-        let appInstalled = localStorage.getItem("vidyutInstalled") || false;
 
         window.addEventListener("beforeinstallprompt", (e) => {
-            if (appInstalled === "true" || installCount >= 3) return; // Stop if installed or limit reached
-
             e.preventDefault();
             deferredPrompt = e;
-            installCount++;
 
+            let installCount = localStorage.getItem("installPromptCount") || 0;
+            let appInstalled = localStorage.getItem("vidyutInstalled") || false;
+            
+            if (appInstalled === "true" || installCount >= 3) return;
+            
+            installCount++;
             localStorage.setItem("installPromptCount", installCount);
 
-            // Show the install button in the upper right corner with no box styling
             let installBtn = document.createElement("button");
             installBtn.innerText = "Install Vidyut";
-            installBtn.style = "position: fixed; top: 15px; right: 15px; font-size: 0.9rem; color: #ffffff; background: none; border: none; cursor: pointer; text-decoration: underline; opacity: 0.8; transition: opacity 0.3s ease;";
-            installBtn.onmouseover = () => installBtn.style.opacity = "1";
-            installBtn.onmouseout = () => installBtn.style.opacity = "0.8";
+            installBtn.classList.add("install-btn");
             installBtn.onclick = () => {
                 deferredPrompt.prompt();
                 deferredPrompt.userChoice.then((choiceResult) => {
                     if (choiceResult.outcome === "accepted") {
-                        console.log("User installed the app");
-                        localStorage.setItem("vidyutInstalled", "true"); // Mark as installed
+                        localStorage.setItem("vidyutInstalled", "true");
                     }
-                    installBtn.remove(); // Remove the button after action
+                    installBtn.remove();
                 });
             };
             document.body.appendChild(installBtn);
         });
 
-        // Detect if the app was installed manually & disable future prompts
         window.addEventListener("appinstalled", () => {
-            console.log("Vidyut has been installed!");
             localStorage.setItem("vidyutInstalled", "true");
         });
     </script>
