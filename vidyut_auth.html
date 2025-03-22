@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vidyut ⚡ - Login</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+            flex-direction: column;
+            background-color: #121212;
+            color: #ffffff;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2rem;
+            border-radius: 10px;
+            width: 320px;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        input:focus {
+            outline: none;
+            border: 1px solid #ffd700;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            background-color: #ffd700;
+            color: #121212;
+            border: none;
+            font-size: 1.2rem;
+            font-weight: 600;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0px 4px 10px rgba(255, 215, 0, 0.5);
+        }
+
+        .info-text {
+            font-size: 0.9rem;
+            color: #bbb;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Vidyut ⚡</h1>
+    <div class="container">
+        <h2>Welcome</h2>
+        <input type="text" placeholder="Enter Username" id="username">
+        <p class="info-text">Enter your username and continue. If you're new, this will create an account!</p>
+        <button class="btn" id="login-button">Continue</button>
+    </div>
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBK6ERxBeqllVW70VwMYs5Pss9oMGhShX8",
+            authDomain: "vidyut-b88c5.firebaseapp.com",
+            projectId: "vidyut-b88c5",
+            storageBucket: "vidyut-b88c5.firebasestorage.app",
+            messagingSenderId: "552051945759",
+            appId: "1:552051945759:web:79038ee244d63ba38bc02a"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        function getDeviceID() {
+            let deviceID = localStorage.getItem("vidyutDeviceID");
+            if (!deviceID) {
+                deviceID = crypto.randomUUID();
+                localStorage.setItem("vidyutDeviceID", deviceID);
+            }
+            return deviceID;
+        }
+
+        async function login() {
+            let username = document.getElementById("username").value.trim();
+            let loginButton = document.getElementById("login-button");
+
+            if (!username) {
+                alert("⚠ Please enter a username!");
+                return;
+            }
+
+            loginButton.innerText = "Checking... ⏳";
+            loginButton.disabled = true;
+
+            const userRef = doc(db, "users", username);
+            const userDoc = await getDoc(userRef);
+            const deviceID = getDeviceID();
+
+            if (!userDoc.exists()) {
+                // New user, create account with this device approved
+                await setDoc(userRef, {
+                    joinedAt: new Date().toISOString(),
+                    devices: { [deviceID]: true }
+                });
+            } else {
+                const userData = userDoc.data();
+
+                // If user has device list and current device is already approved
+                if (userData.devices && userData.devices[deviceID]) {
+                    localStorage.setItem("vidyutUsername", username);
+                    window.location.href = "dashboard.html";
+                    return;
+                }
+
+                // If new device, ask for approval
+                const approval = confirm(`New device detected! Approve login for ${username}?`);
+                if (!approval) {
+                    loginButton.innerText = "Continue";
+                    loginButton.disabled = false;
+                    return;
+                }
+
+                // Save new device as approved
+                await updateDoc(userRef, {
+                    [`devices.${deviceID}`]: true
+                });
+            }
+
+            localStorage.setItem("vidyutUsername", username);
+            window.location.href = "dashboard.html";
+        }
+
+        document.getElementById("login-button").addEventListener("click", login);
+    </script>
+</body>
+</html>

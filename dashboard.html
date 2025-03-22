@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vidyut ⚡ - Dashboard</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: #121212;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            text-align: center;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2rem;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 600px;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .tools {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .tool {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 5px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .tool:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome, <span id="username"></span> 👋</h1>
+        <p>Select a tool to boost your JEE prep:</p>
+        <div class="tools">
+            <div class="tool" onclick="alert('Coming soon!')">📚 Study Planner</div>
+            <div class="tool" onclick="alert('Coming soon!')">📝 Practice Questions</div>
+            <div class="tool" onclick="alert('Coming soon!')">📊 Performance Tracker</div>
+            <div class="tool" onclick="window.location.href='settings.html'">⚙ Settings</div>
+        </div>
+    </div>
+
+    <script>
+        const username = localStorage.getItem("vidyutUsername");
+        if (!username) {
+            window.location.href = "index.html"; // Redirect if not logged in
+        } else {
+            document.getElementById("username").innerText = username;
+        }
+    </script>
+</body>
+</html>
