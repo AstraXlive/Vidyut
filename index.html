@@ -6,9 +6,8 @@
     <meta name="theme-color" content="#121212">
     <title>Vidyut ⚡️ - Designed for Focus. Built for Success.</title>
     <link rel="manifest" href="manifest.json">
-<link rel="icon" type="image/png" sizes="192x192" href="maskable_icon_x192.png">
-<link rel="apple-touch-icon" href="maskable_icon_x512.png">
-
+    <link rel="icon" type="image/png" sizes="192x192" href="maskable_icon_x192.png">
+    <link rel="apple-touch-icon" href="maskable_icon_x512.png">
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
@@ -85,5 +84,43 @@
     <h1>Vidyut ⚡️</h1>
     <p>Designed for Focus. Built for Success.</p>
     <button class="cta-btn" onclick="window.location.href='vidyut_auth.html'">Get Started</button>
+
+    <script>
+        let deferredPrompt;
+        let installCount = localStorage.getItem("installPromptCount") || 0;
+        let appInstalled = localStorage.getItem("vidyutInstalled") || false;
+
+        window.addEventListener("beforeinstallprompt", (e) => {
+            if (appInstalled === "true" || installCount >= 3) return; // Stop if installed or limit reached
+
+            e.preventDefault();
+            deferredPrompt = e;
+            installCount++;
+
+            localStorage.setItem("installPromptCount", installCount);
+
+            // Show the install button
+            let installBtn = document.createElement("button");
+            installBtn.innerText = "📲 Install Vidyut App";
+            installBtn.style = "position: fixed; bottom: 20px; padding: 10px 20px; background: #ffd700; border: none; color: #121212; border-radius: 5px; cursor: pointer;";
+            installBtn.onclick = () => {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === "accepted") {
+                        console.log("User installed the app");
+                        localStorage.setItem("vidyutInstalled", "true"); // Mark as installed
+                    }
+                    installBtn.remove(); // Remove the button after action
+                });
+            };
+            document.body.appendChild(installBtn);
+        });
+
+        // Detect if the app was installed manually & disable future prompts
+        window.addEventListener("appinstalled", () => {
+            console.log("Vidyut has been installed!");
+            localStorage.setItem("vidyutInstalled", "true");
+        });
+    </script>
 </body>
 </html>
