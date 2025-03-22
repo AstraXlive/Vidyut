@@ -93,12 +93,18 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-        // Initialize Firebase
-        const firebaseConfig = { /* Your Firebase Config Here */ };
+        const firebaseConfig = {
+            apiKey: "AIzaSyBK6ERxBeqllVW70VwMYs5Pss9oMGhShX8",
+            authDomain: "vidyut-b88c5.firebaseapp.com",
+            projectId: "vidyut-b88c5",
+            storageBucket: "vidyut-b88c5.appspot.com",
+            messagingSenderId: "552051945759",
+            appId: "1:552051945759:web:79038ee244d63ba38bc02a"
+        };
+
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Hash function (simple SHA-256)
         async function hashPassword(password) {
             const encoder = new TextEncoder();
             const data = encoder.encode(password);
@@ -126,9 +132,8 @@
             const hashedPassword = await hashPassword(password);
 
             if (!userDoc.exists()) {
-                // New user, create account
                 await setDoc(userRef, {
-                    password: hashedPassword, // Store hashed password
+                    password: hashedPassword,
                     joinedAt: new Date().toISOString()
                 });
                 alert("✅ Account created successfully!");
