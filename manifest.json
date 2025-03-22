@@ -1,7 +1,7 @@
 {
-  "name": "Your App Name",
-  "short_name": "YourApp",
-  "description": "A short description of your app.",
+  "name": "Vidyut ⚡️",
+  "short_name": "Vidyut",
+  "description": "A powerful study companion for JEE aspirants.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
