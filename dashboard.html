@@ -63,18 +63,20 @@
             margin-top: 20px;
         }
 
-        /* Artistic Quote Section */
+        /* 🎨 Elegant Quote Box */
         .quote-box {
-            background: transparent;
+            background: rgba(255, 215, 0, 0.1);
             color: #FFD700;
             font-family: 'Playfair Display', serif;
             font-size: 22px;
             font-weight: 500;
-            padding: 15px;
+            padding: 20px;
             margin: 20px auto;
             width: 80%;
             border-left: 4px solid #FFD700;
-            text-align: left;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0px 4px 12px rgba(255, 215, 0, 0.3);
         }
 
         /* 🚀 Improved Buttons */
@@ -234,6 +236,9 @@
                 getGreeting(storedUsername);
             }
         }
+
+        const quotes = ["Stay focused, stay determined!", "Hard work beats talent!", "Success is built daily!", "Your dreams need effort!"];
+        setInterval(() => document.getElementById("quote").innerText = quotes[Math.floor(Math.random() * quotes.length)], 5000);
 
         loadUsername();
     </script>
