@@ -1,247 +1,141 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vidyut ⚡ Dashboard</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Playfair+Display:wght@500;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            margin: 0;
-            padding: 0;
-            background: #000;
-            color: white;
-            text-align: center;
-        }
-
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 20px;
-            background: #111;
-            box-shadow: 0 2px 10px rgba(255, 215, 0, 0.2);
-        }
-
-        .logo {
-            font-size: 26px;
-            font-weight: bold;
-            color: #FFD700;
-        }
-
-        .nav-icons {
-            display: flex;
-            align-items: center;
-        }
-
-        .material-icons {
-            font-size: 30px;
-            margin-left: 15px;
-            cursor: pointer;
-            transition: transform 0.2s ease;
-        }
-
-        .material-icons:hover {
-            transform: scale(1.1);
-        }
-
-        .hamburger-menu {
-            font-size: 32px;
-            cursor: pointer;
-            margin-left: 10px;
-            color: white;
-        }
-
-        #greeting {
-            font-size: 30px;
-            font-weight: 600;
-            margin-top: 20px;
-        }
-
-        /* 🎨 Elegant Quote Box */
-        .quote-box {
-            background: rgba(255, 215, 0, 0.1);
-            color: #FFD700;
-            font-family: 'Playfair Display', serif;
-            font-size: 22px;
-            font-weight: 500;
-            padding: 20px;
-            margin: 20px auto;
-            width: 80%;
-            border-left: 4px solid #FFD700;
-            border-radius: 10px;
-            text-align: center;
-            box-shadow: 0px 4px 12px rgba(255, 215, 0, 0.3);
-        }
-
-        /* 🚀 Improved Buttons */
-        .quick-links {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 12px;
-            margin-top: 20px;
-        }
-
-        .link-btn {
-            background: #222;
-            color: #FFD700;
-            padding: 15px 25px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 16px;
-            border: 2px solid #FFD700;
-            transition: all 0.3s ease-in-out;
-            box-shadow: 0 4px 12px rgba(255, 215, 0, 0.2);
-        }
-
-        .link-btn:hover {
-            background: #FFD700;
-            color: black;
-            transform: translateY(-3px);
-            box-shadow: 0 8px 18px rgba(255, 215, 0, 0.5);
-        }
-
-        /* Progress Tracker */
-        .progress-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-top: 25px;
-        }
-
-        .goal-input {
-            padding: 12px;
-            width: 60%;
-            border-radius: 10px;
-            font-size: 16px;
-            border: 2px solid #FFD700;
-            background: #111;
-            color: white;
-        }
-
-        .goal-btn {
-            padding: 12px 15px;
-            background: #FFD700;
-            color: black;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 18px;
-            transition: all 0.2s;
-            border: none;
-        }
-
-        .goal-btn:hover {
-            background: #FFEA00;
-            transform: scale(1.1);
-        }
-
-        .progress-chart {
-            margin-top: 20px;
-        }
-
-        footer {
-            display: flex;
-            justify-content: space-around;
-            padding: 12px;
-            background: #111;
-            position: fixed;
-            width: 100%;
-            bottom: 0;
-        }
-
-        .home-btn, .tv-btn {
-            font-size: 30px;
-            cursor: pointer;
-            color: white;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vidyut Dashboard</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #121212;
+      color: white;
+    }
+    .navbar {
+      background-color: #1e1e1e;
+      padding: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 2px solid #FFD700;
+    }
+    .navbar .left {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #FFD700;
+    }
+    .navbar .right i {
+      margin-left: 1rem;
+      font-size: 1.2rem;
+    }
+    .section {
+      padding: 1rem;
+      text-align: center;
+    }
+    .section h2 {
+      margin-top: 0;
+    }
+    .quote-box {
+      border: 1px solid #FFD700;
+      border-radius: 10px;
+      padding: 1rem;
+      margin: 1rem auto;
+      max-width: 90%;
+      font-style: italic;
+      background-color: rgba(255, 215, 0, 0.05);
+    }
+    .progress-box, .streak-box {
+      border: 1px solid #FFD700;
+      border-radius: 10px;
+      margin: 1rem auto;
+      padding: 1rem;
+      max-width: 90%;
+      background-color: rgba(255, 215, 0, 0.05);
+    }
+    .progress-bar {
+      height: 1rem;
+      background-color: #333;
+      border-radius: 5px;
+      overflow: hidden;
+      margin-top: 0.5rem;
+    }
+    .progress-bar-inner {
+      width: 66%;
+      height: 100%;
+      background-color: #FFD700;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      padding: 1rem;
+    }
+    .button {
+      background-color: #FFD700;
+      color: black;
+      padding: 1rem;
+      border-radius: 10px;
+      font-weight: bold;
+      text-align: center;
+    }
+    .bottom-nav {
+      display: flex;
+      justify-content: space-around;
+      padding: 1rem;
+      background-color: #1e1e1e;
+      border-top: 2px solid #FFD700;
+    }
+    .bottom-nav div {
+      text-align: center;
+      color: #FFD700;
+    }
+  </style>
 </head>
 <body>
+  <div class="navbar">
+    <div class="left">Vidyut ⚡</div>
+    <div class="right">
+      <i>🔍</i>
+      <i>⚙️</i>
+      <i>👤</i>
+    </div>
+  </div>
 
-    <header>
-        <div class="logo">Vidyut ⚡</div>
-        <div class="nav-icons">
-            <span class="material-icons">account_circle</span>
-            <span class="hamburger-menu">&#9776;</span>
-        </div>
-    </header>
-
-    <h1 id="greeting">Loading...</h1>
-
+  <div class="section">
+    <h2>Good Morning 🌄</h2>
     <div class="quote-box">
-        <p id="quote">"Stay focused, stay determined!"</p>
+      Hard work beats talent when talent doesn’t work hard.
     </div>
 
-    <div class="quick-links">
-        <button class="link-btn">📖 Syllabus</button>
-        <button class="link-btn">📝 Practice Tests</button>
-        <button class="link-btn">🔢 Formulas</button>
-        <button class="link-btn">📊 Mock Tests</button>
-        <button class="link-btn">💡 Tips & Tricks</button>
-        <button class="link-btn">📅 Study Plans</button>
+    <div class="progress-box">
+      <strong>📊 Weekly Study Progress</strong>
+      <div class="progress-bar">
+        <div class="progress-bar-inner"></div>
+      </div>
+      <p>56/84 Hours Completed</p>
     </div>
 
-    <div class="progress-container">
-        <input type="text" placeholder="Set Today's Goal..." class="goal-input">
-        <button class="goal-btn">➝</button>
+    <div class="streak-box">
+      <strong>🔥 Study Streak</strong>
+      <p>Current Streak: 12 Days</p>
+      <p>Highest Streak: 25 Days</p>
     </div>
 
-    <div class="progress-chart">
-        <canvas id="progressChart"></canvas>
+    <div class="grid">
+      <div class="button">📖 Study Timer</div>
+      <div class="button">📝 Practice</div>
+      <div class="button">🧠 Mock Tests</div>
+      <div class="button">📜 Past Papers</div>
+      <div class="button">📚 Formulas</div>
+      <div class="button">📂 Cheat Sheets</div>
     </div>
+  </div>
 
-    <footer>
-        <span class="material-icons home-btn">home</span>
-        <span class="material-icons tv-btn">live_tv</span>
-    </footer>
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
-        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
-
-        const firebaseConfig = { /* Your Firebase Config Here */ };
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-
-        function getGreeting(username) {
-            const hours = new Date().getHours();
-            let greeting = hours < 12 ? "Good Morning" :
-                           hours < 18 ? "Good Afternoon" :
-                           hours < 21 ? "Good Evening" : "Good Night";
-
-            document.getElementById("greeting").innerText = `${greeting}, ${username}!`;
-        }
-
-        async function loadUsername() {
-            const storedUsername = localStorage.getItem("vidyutUsername");
-
-            if (!storedUsername) {
-                document.getElementById("greeting").innerText = "Hello, Guest!";
-                return;
-            }
-
-            try {
-                const userRef = doc(db, "users", storedUsername);
-                const userDoc = await getDoc(userRef);
-
-                getGreeting(userDoc.exists() ? storedUsername : "Guest");
-            } catch (error) {
-                getGreeting(storedUsername);
-            }
-        }
-
-        const quotes = ["Stay focused, stay determined!", "Hard work beats talent!", "Success is built daily!", "Your dreams need effort!"];
-        setInterval(() => document.getElementById("quote").innerText = quotes[Math.floor(Math.random() * quotes.length)], 5000);
-
-        loadUsername();
-    </script>
-
+  <div class="bottom-nav">
+    <div>🏠 Home</div>
+    <div>🧩 Puzzles</div>
+    <div>🛠 Tools</div>
+    <div>📺 Watch</div>
+  </div>
 </body>
 </html>
