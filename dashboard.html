@@ -4,12 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Vidyut Dashboard</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <style>
     body {
       margin: 0;
       font-family: 'Segoe UI', sans-serif;
       background-color: #121212;
       color: white;
+      transition: background-color 0.3s, color 0.3s;
     }
     .navbar {
       background-color: #1e1e1e;
@@ -26,31 +28,31 @@
     }
     .navbar .right i {
       margin-left: 1rem;
-      font-size: 1.2rem;
+      font-size: 1.5rem;
+      color: #FFD700;
+      cursor: pointer;
+      transition: transform 0.3s;
+    }
+    .navbar .right i:hover {
+      transform: scale(1.2);
     }
     .section {
       padding: 1rem;
       text-align: center;
+      animation: fadeIn 1s ease-in;
     }
-    .section h2 {
-      margin-top: 0;
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
     }
-    .quote-box {
+    .quote-box, .progress-box, .streak-box {
       border: 1px solid #FFD700;
       border-radius: 10px;
       padding: 1rem;
       margin: 1rem auto;
       max-width: 90%;
-      font-style: italic;
       background-color: rgba(255, 215, 0, 0.05);
-    }
-    .progress-box, .streak-box {
-      border: 1px solid #FFD700;
-      border-radius: 10px;
-      margin: 1rem auto;
-      padding: 1rem;
-      max-width: 90%;
-      background-color: rgba(255, 215, 0, 0.05);
+      animation: fadeIn 1s ease-in;
     }
     .progress-bar {
       height: 1rem;
@@ -63,6 +65,7 @@
       width: 66%;
       height: 100%;
       background-color: #FFD700;
+      transition: width 0.5s ease;
     }
     .grid {
       display: grid;
@@ -77,6 +80,11 @@
       border-radius: 10px;
       font-weight: bold;
       text-align: center;
+      cursor: pointer;
+      transition: transform 0.3s;
+    }
+    .button:hover {
+      transform: scale(1.05);
     }
     .bottom-nav {
       display: flex;
@@ -89,26 +97,28 @@
       text-align: center;
       color: #FFD700;
     }
+    .material-icons {
+      vertical-align: middle;
+    }
   </style>
 </head>
 <body>
   <div class="navbar">
     <div class="left">Vidyut ⚡</div>
     <div class="right">
-      <i>🔍</i>
-      <i>⚙️</i>
-      <i>👤</i>
+      <i class="material-icons">settings</i>
+      <i class="material-icons">person</i>
     </div>
   </div>
 
   <div class="section">
-    <h2>Good Morning 🌄</h2>
+    <h2 id="greeting">Good Day</h2>
     <div class="quote-box">
       Hard work beats talent when talent doesn’t work hard.
     </div>
 
     <div class="progress-box">
-      <strong>📊 Weekly Study Progress</strong>
+      <strong><i class="material-icons">bar_chart</i> Weekly Study Progress</strong>
       <div class="progress-bar">
         <div class="progress-bar-inner"></div>
       </div>
@@ -116,26 +126,39 @@
     </div>
 
     <div class="streak-box">
-      <strong>🔥 Study Streak</strong>
+      <strong><i class="material-icons">whatshot</i> Study Streak</strong>
       <p>Current Streak: 12 Days</p>
       <p>Highest Streak: 25 Days</p>
     </div>
 
     <div class="grid">
-      <div class="button">📖 Study Timer</div>
-      <div class="button">📝 Practice</div>
-      <div class="button">🧠 Mock Tests</div>
-      <div class="button">📜 Past Papers</div>
-      <div class="button">📚 Formulas</div>
-      <div class="button">📂 Cheat Sheets</div>
+      <div class="button"><i class="material-icons">schedule</i><br>Study Timer</div>
+      <div class="button"><i class="material-icons">edit</i><br>Practice</div>
+      <div class="button"><i class="material-icons">psychology</i><br>Mock Tests</div>
+      <div class="button"><i class="material-icons">description</i><br>Past Papers</div>
+      <div class="button"><i class="material-icons">functions</i><br>Formulas</div>
+      <div class="button"><i class="material-icons">view_module</i><br>Cheat Sheets</div>
     </div>
   </div>
 
   <div class="bottom-nav">
-    <div>🏠 Home</div>
-    <div>🧩 Puzzles</div>
-    <div>🛠 Tools</div>
-    <div>📺 Watch</div>
+    <div><i class="material-icons">home</i><br>Home</div>
+    <div><i class="material-icons">extension</i><br>Puzzles</div>
+    <div><i class="material-icons">build</i><br>Tools</div>
+    <div><i class="material-icons">tv</i><br>Watch</div>
   </div>
+
+  <script>
+    // Dynamic Greeting based on time
+    const greeting = document.getElementById('greeting');
+    const hour = new Date().getHours();
+    if (hour < 12) {
+      greeting.textContent = 'Good Morning ☀️';
+    } else if (hour < 18) {
+      greeting.textContent = 'Good Afternoon 🌞';
+    } else {
+      greeting.textContent = 'Good Evening 🌃️';
+    }
+  </script>
 </body>
 </html>
