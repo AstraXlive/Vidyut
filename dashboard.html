@@ -297,18 +297,66 @@
     const hour = new Date().getHours();
 greeting.textContent = hour < 12 ? 'Good Morning ☀️' : hour < 18 ? 'Good Afternoon 🌞' : 'Good Evening 🌃️';
 
-    async function fetchQuote() {
-  try {
-    const res = await fetch("https://api.quotable.io/random");
-    const data = await res.json();
-    document.getElementById("quote-box").textContent = `"${data.content}" — ${data.author}`;
-  } catch (err) {
-    document.getElementById("quote-box").textContent = "Padhle bhai! Life set ho jayegi.";
-  }
+    const quotes = [
+  "Stop scrolling. Start studying.",
+  "Your future IITian self is watching. Don’t disappoint.",
+  "Every topper was once clueless. They just didn’t stay that way.",
+  "JEE won’t crack itself. You’ve got work to do.",
+  "Books over reels, goals over distractions.",
+  "Don’t count the hours. Make the hours count.",
+  "Success is 1% luck, 99% not checking Instagram.",
+  "Dream big. Then wake up and grind.",
+  "You either suffer the pain of discipline or the pain of regret.",
+  "Less talk, more chalk. Hit the books!",
+  "You’ve got a brain and a dream. Use both.",
+  "The syllabus is scary—but not scarier than failure.",
+  "Finish what you started. The seat is waiting.",
+  "No cheat codes. Just chapters.",
+  "Future flex > temporary dopamine.",
+  "Distractions are expensive. Your dream costs focus.",
+  "fuck it, we ball.",
+  "Quotes don’t work until you do.",
+  "Your lack of commitment or focus is almost an insult to the people who believe in you.",
+  "If you don’t sacrifice for what you want, what you want becomes the sacrifice.",
+  "It’s not over until I win.",
+  "You took a drop, not an L. Make it count.",
+  "Sleep is for toppers. You’re in redemption mode.",
+  "You didn’t come this far just to scroll memes.",
+  "No second thoughts. Only second chances.",
+  "Droppers don’t cry. They crack.",
+  "You’ve got 365 chances to flip the script.",
+  "Keep your head down now, so it can wear a crown later.",
+  "The syllabus is long, but so is your potential.",
+  "One year of pain. A lifetime of flex.",
+  "The only 'shortcut' is showing up daily.",
+  "Motivation fades. Systems stay.",
+  "Don’t chase motivation. Chase mastery.",
+  "Some people dream of IIT. You’re building your way in.",
+  "Winners rehearse in silence. The result makes the noise.",
+  "You dropped a year for a reason. Remind yourself every day.",
+  "Your future self is watching like ‘don’t mess this up again, bro.’",
+  "You’re not late. You’re just on a different route to glory.",
+  "Discipline is self-respect in action.",
+  "Hard work doesn't guarantee success—but lack of it guarantees failure.",
+  "Do it scared. Do it tired. Just don’t not do it.",
+  "You will never always be motivated, so you must learn to be disciplined.",
+  "If you want something you’ve never had, you’ve got to do something you’ve never done.",
+  "Success is what comes after you’ve stopped making excuses.",
+  "The pain you feel today will be the strength you feel tomorrow.",
+  "Losers quit when they're tired. Winners quit when they're done.",
+  "Don’t count the days, make the days count.",
+  "The grind never lies. If you put in the work, the results will show.",
+  "Dreams don’t work unless you do.",
+  "You didn’t come this far to only come this far.",
+  "Be stronger than your strongest excuse."
+];
+function fetchQuote() {
+  const quoteText = document.getElementById("quote-box");  // Corrected
+  const randomIndex = Math.floor(Math.random() * quotes.length);
+  quoteText.innerText = quotes[randomIndex];
 }
-fetchQuote();
 
-fetchQuote(); // call on page load
+fetchQuote();
 
     const profileIcon = document.getElementById('profile-icon');
     const profileDropdown = document.getElementById('profile-dropdown');

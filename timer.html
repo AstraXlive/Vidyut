@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vidyut Timer</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Roboto', sans-serif;
+      background-color: #0f0f0f;
+      color: #f5f5f5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1rem;
+    }
+    header {
+      width: 100%;
+      text-align: center;
+      font-size: 1.5rem;
+      font-weight: bold;
+      padding: 1rem;
+      color: #ffc107;
+    }
+    .total-timer {
+      font-size: 3rem;
+      font-weight: bold;
+      margin-bottom: 2rem;
+    }
+    .subject {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      max-width: 500px;
+      padding: 1rem;
+      margin: 0.5rem 0;
+      background-color: #1e1e1e;
+      border-radius: 0.75rem;
+    }
+    .subject-name {
+      font-size: 1.25rem;
+      flex: 1;
+    }
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .material-icons {
+      cursor: pointer;
+      color: #ffc107;
+      font-size: 1.5rem;
+    }
+    #add-subject, #add-todo {
+      margin-top: 1rem;
+      padding: 0.5rem 1rem;
+      background-color: #ffc107;
+      color: #000;
+      border: none;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    #chart-container {
+      margin-top: 2rem;
+      width: 100%;
+      max-width: 500px;
+    }
+  </style>
+</head>
+<body>
+  <header>Tue, 22/04</header>
+  <div class="total-timer" id="totalTimer">00:00:00</div>
+
+  <div id="subjects"></div>
+
+  <button id="add-subject">+ Subject</button>
+  <button id="add-todo">+ To-do</button>
+
+  <div id="chart-container">
+    <canvas id="studyChart"></canvas>
+  </div>
+
+  <script>
+    let subjects = ["Maths", "Chemistry", "Physics"];
+    let activeSubject = null;
+    let timers = {};
+    let intervals = {};
+
+    const totalTime = {
+      "Maths": 0,
+      "Chemistry": 0,
+      "Physics": 0
+    };
+
+    const formatTime = (seconds) => {
+      const hrs = String(Math.floor(seconds / 3600)).padStart(2, '0');
+      const mins = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
+      const secs = String(seconds % 60).padStart(2, '0');
+      return `${hrs}:${mins}:${secs}`;
+    };
+
+    const renderSubjects = () => {
+      const container = document.getElementById('subjects');
+      container.innerHTML = '';
+
+      subjects.forEach((subject) => {
+        const subjectDiv = document.createElement('div');
+        subjectDiv.className = 'subject';
+
+        const name = document.createElement('div');
+        name.className = 'subject-name';
+        name.textContent = subject;
+
+        const time = document.createElement('div');
+        time.id = `time-${subject}`;
+        time.textContent = formatTime(totalTime[subject]);
+
+        const controls = document.createElement('div');
+        controls.className = 'controls';
+
+        const playPause = document.createElement('span');
+        playPause.className = 'material-icons';
+        playPause.textContent = 'play_arrow';
+        playPause.onclick = () => toggleTimer(subject, playPause);
+
+        const manualAdd = document.createElement('span');
+        manualAdd.className = 'material-icons';
+        manualAdd.textContent = 'edit';
+        manualAdd.onclick = () => {
+          const minutes = parseInt(prompt("Add minutes for " + subject + ":"), 10);
+          if (!isNaN(minutes)) {
+            totalTime[subject] += minutes * 60;
+            updateTimers();
+          }
+        };
+
+        controls.appendChild(playPause);
+        controls.appendChild(manualAdd);
+        subjectDiv.appendChild(name);
+        subjectDiv.appendChild(time);
+        subjectDiv.appendChild(controls);
+
+        container.appendChild(subjectDiv);
+      });
+    };
+
+    const toggleTimer = (subject, icon) => {
+      if (activeSubject && activeSubject !== subject) return alert("Only one subject at a time!");
+
+      if (intervals[subject]) {
+        clearInterval(intervals[subject]);
+        intervals[subject] = null;
+        activeSubject = null;
+        icon.textContent = 'play_arrow';
+      } else {
+        activeSubject = subject;
+        intervals[subject] = setInterval(() => {
+          totalTime[subject]++;
+          updateTimers();
+        }, 1000);
+        icon.textContent = 'pause';
+      }
+    };
+
+    const updateTimers = () => {
+      subjects.forEach((subject) => {
+        document.getElementById(`time-${subject}`).textContent = formatTime(totalTime[subject]);
+      });
+      const total = subjects.reduce((acc, s) => acc + totalTime[s], 0);
+      document.getElementById('totalTimer').textContent = formatTime(total);
+      updateChart();
+    };
+
+    const ctx = document.getElementById('studyChart');
+    const chart = new Chart(ctx, {
+      type: 'pie',
+      data: {
+        labels: subjects,
+        datasets: [{
+          label: 'Study Time (seconds)',
+          data: subjects.map(s => totalTime[s]),
+          backgroundColor: ['#f44336', '#4caf50', '#2196f3'],
+        }]
+      },
+      options: {
+        plugins: {
+          legend: {
+            labels: {
+              color: '#fff'
+            }
+          }
+        }
+      }
+    });
+
+    const updateChart = () => {
+      chart.data.datasets[0].data = subjects.map(s => totalTime[s]);
+      chart.update();
+    };
+
+    document.getElementById('add-subject').onclick = () => {
+      const newSub = prompt("Enter new subject name:");
+      if (newSub && !subjects.includes(newSub)) {
+        subjects.push(newSub);
+        totalTime[newSub] = 0;
+        renderSubjects();
+        updateTimers();
+      }
+    };
+
+    document.getElementById('add-todo').onclick = () => {
+      alert("TODO feature coming soon!");
+    };
+
+    renderSubjects();
+    updateTimers();
+  </script>
+</body>
+</html>
