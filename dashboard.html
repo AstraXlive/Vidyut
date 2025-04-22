@@ -5,13 +5,28 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Vidyut Dashboard</title>
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --bg-color: #121212;
+      --text-color: white;
+      --highlight: #FFD700;
+      --box-bg: rgba(255, 215, 0, 0.03);
+      --quote-bg: rgba(255, 215, 0, 0.05);
+    }
+    body.light-mode {
+      --bg-color: #f2f2f2;
+      --text-color: #121212;
+      --box-bg: rgba(0, 0, 0, 0.05);
+      --quote-bg: rgba(0, 0, 0, 0.03);
+    }
     body {
       margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #121212;
-      color: white;
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
       transition: background-color 0.3s, color 0.3s;
+      padding-bottom: 120px;
     }
     .navbar {
       background-color: #1e1e1e;
@@ -19,40 +34,117 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      border-bottom: 2px solid #FFD700;
+      border-bottom: 2px solid var(--highlight);
     }
     .navbar .left {
       font-size: 1.5rem;
       font-weight: bold;
-      color: #FFD700;
+      color: var(--highlight);
+    }
+    .navbar .right {
+      display: flex;
+      align-items: center;
+      position: relative;
     }
     .navbar .right i {
       margin-left: 1rem;
       font-size: 1.5rem;
-      color: #FFD700;
+      color: var(--highlight);
       cursor: pointer;
-      transition: transform 0.3s;
+      transition: transform 0.2s ease-in-out;
     }
     .navbar .right i:hover {
-      transform: scale(1.2);
+      transform: scale(1.15);
+    }
+    .dropdown {
+      position: absolute;
+      top: 2.5rem;
+      right: 0;
+      background-color: #1e1e1e;
+      border: 1px solid var(--highlight);
+      border-radius: 10px;
+      display: none;
+      flex-direction: column;
+      min-width: 200px;
+      z-index: 10;
+    }
+    .dropdown.show {
+      display: flex;
+    }
+    .dropdown a {
+      padding: 0.75rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--highlight);
+      text-decoration: none;
+      transition: background-color 0.2s;
+    }
+    .dropdown a:hover {
+      background-color: #2a2a2a;
+    }
+    .sidebar {
+      position: fixed;
+      top: 0;
+      right: -300px;
+      height: 100%;
+      width: 250px;
+      background-color: #1e1e1e;
+      border-left: 2px solid var(--highlight);
+      padding: 1rem;
+      transition: right 0.3s ease;
+      z-index: 100;
+    }
+    .sidebar.show {
+      right: 0;
+    }
+    .sidebar .close {
+      text-align: right;
+      cursor: pointer;
+      margin-bottom: 1rem;
+    }
+    .sidebar a {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      color: var(--highlight);
+      text-decoration: none;
+    }
+    .sidebar a:hover {
+      color: white;
+    }
+    .sidebar a.toastable::after {
+      content: '';
     }
     .section {
       padding: 1rem;
       text-align: center;
-      animation: fadeIn 1s ease-in;
     }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .quote-box, .progress-box, .streak-box {
-      border: 1px solid #FFD700;
+    .quote-box {
+      border-left: 4px solid var(--highlight);
+      background-color: var(--quote-bg);
+      font-size: 1.2rem;
+      font-family: 'Georgia', serif;
       border-radius: 10px;
       padding: 1rem;
       margin: 1rem auto;
       max-width: 90%;
-      background-color: rgba(255, 215, 0, 0.05);
-      animation: fadeIn 1s ease-in;
+    }
+    .progress-box, .streak-box {
+      border: 1px solid var(--highlight);
+      border-radius: 10px;
+      padding: 1rem;
+      margin: 1rem auto;
+      max-width: 90%;
+      background-color: var(--box-bg);
+    }
+    .streak-box i {
+      animation: flicker 1s infinite alternate;
+    }
+    @keyframes flicker {
+      0% { color: var(--highlight); }
+      100% { color: orange; }
     }
     .progress-bar {
       height: 1rem;
@@ -64,7 +156,7 @@
     .progress-bar-inner {
       width: 66%;
       height: 100%;
-      background-color: #FFD700;
+      background-color: var(--highlight);
       transition: width 0.5s ease;
     }
     .grid {
@@ -73,32 +165,71 @@
       gap: 1rem;
       padding: 1rem;
     }
-    .button {
-      background-color: #FFD700;
+    @media (max-width: 768px) {
+      .grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    .button a {
+      background-color: var(--highlight);
       color: black;
       padding: 1rem;
       border-radius: 10px;
       font-weight: bold;
       text-align: center;
-      cursor: pointer;
-      transition: transform 0.3s;
+      text-decoration: none;
+      display: block;
+      transition: transform 0.2s ease-in-out;
     }
-    .button:hover {
+    .button a:hover {
       transform: scale(1.05);
     }
     .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
       display: flex;
       justify-content: space-around;
       padding: 1rem;
       background-color: #1e1e1e;
-      border-top: 2px solid #FFD700;
+      border-top: 2px solid var(--highlight);
+      z-index: 999;
     }
-    .bottom-nav div {
+    .bottom-nav a {
       text-align: center;
-      color: #FFD700;
+      color: var(--highlight);
+      text-decoration: none;
+    }
+    .footer {
+      margin-top: 3rem;
+      text-align: center;
+      font-size: 0.9rem;
+      color: #888;
+      padding-bottom: 2rem;
     }
     .material-icons {
       vertical-align: middle;
+    }
+    #toast {
+      visibility: hidden;
+      min-width: 250px;
+      background-color: #333;
+      color: white;
+      text-align: center;
+      border-radius: 8px;
+      padding: 16px;
+      position: fixed;
+      bottom: 100px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 9999;
+      transition: visibility 0s, opacity 0.5s linear;
+      opacity: 0;
+    }
+    #toast.show {
+      visibility: visible;
+      opacity: 1;
     }
   </style>
 </head>
@@ -106,17 +237,30 @@
   <div class="navbar">
     <div class="left">Vidyut ⚡</div>
     <div class="right">
-      <i class="material-icons">settings</i>
-      <i class="material-icons">person</i>
+      <i class="material-icons" onclick="toggleDarkMode()">light_mode</i>
+      <i class="material-icons" onclick="toggleSidebar()">menu</i>
+      <i class="material-icons" id="profile-icon">person</i>
+      <div class="dropdown" id="profile-dropdown">
+        <a href="settings.html"><i class="material-icons">settings</i> Profile Settings</a>
+        <a href="progress.html"><i class="material-icons">insights</i> My Progress</a>
+        <a href="themes.html"><i class="material-icons">palette</i> Themes</a>
+        <a href="logout.html"><i class="material-icons">exit_to_app</i> Logout</a>
+      </div>
     </div>
+  </div>
+
+  <div class="sidebar" id="sidebar">
+    <div class="close" onclick="toggleSidebar()"><i class="material-icons">close</i></div>
+    <a href="tracker.html" class="toastable"><i class="material-icons">track_changes</i> Study Tracker</a>
+    <a href="tests.html" class="toastable"><i class="material-icons">quiz</i> Chapterwise Tests</a>
+    <a href="resources.html" class="toastable"><i class="material-icons">library_books</i> Resources</a>
+    <a href="themes.html" class="toastable"><i class="material-icons">palette</i> Themes</a>
+    <a href="support.html" class="toastable"><i class="material-icons">help_outline</i> Help & Support</a>
   </div>
 
   <div class="section">
     <h2 id="greeting">Good Day</h2>
-    <div class="quote-box">
-      Hard work beats talent when talent doesn’t work hard.
-    </div>
-
+    <div class="quote-box" id="quote-box"></div>
     <div class="progress-box">
       <strong><i class="material-icons">bar_chart</i> Weekly Study Progress</strong>
       <div class="progress-bar">
@@ -124,41 +268,79 @@
       </div>
       <p>56/84 Hours Completed</p>
     </div>
-
     <div class="streak-box">
       <strong><i class="material-icons">whatshot</i> Study Streak</strong>
       <p>Current Streak: 12 Days</p>
       <p>Highest Streak: 25 Days</p>
     </div>
-
     <div class="grid">
-      <div class="button"><i class="material-icons">schedule</i><br>Study Timer</div>
-      <div class="button"><i class="material-icons">edit</i><br>Practice</div>
-      <div class="button"><i class="material-icons">psychology</i><br>Mock Tests</div>
-      <div class="button"><i class="material-icons">description</i><br>Past Papers</div>
-      <div class="button"><i class="material-icons">functions</i><br>Formulas</div>
-      <div class="button"><i class="material-icons">view_module</i><br>Cheat Sheets</div>
+      <div class="button"><a href="timer.html"><i class="material-icons">schedule</i><br>Study Timer</a></div>
+      <div class="button"><a href="practice.html"><i class="material-icons">edit</i><br>Practice</a></div>
+      <div class="button"><a href="mock.html"><i class="material-icons">psychology</i><br>Mock Tests</a></div>
+      <div class="button"><a href="papers.html"><i class="material-icons">description</i><br>Past Papers</a></div>
+      <div class="button"><a href="formulas.html"><i class="material-icons">functions</i><br>Formulas</a></div>
+      <div class="button"><a href="cheats.html"><i class="material-icons">view_module</i><br>Cheat Sheets</a></div>
     </div>
+    <div class="footer">Made with love by Shubham at AstraX</div>
   </div>
 
   <div class="bottom-nav">
-    <div><i class="material-icons">home</i><br>Home</div>
-    <div><i class="material-icons">extension</i><br>Puzzles</div>
-    <div><i class="material-icons">build</i><br>Tools</div>
-    <div><i class="material-icons">tv</i><br>Watch</div>
+    <a href="index.html"><i class="material-icons">home</i><br>Home</a>
+    <a href="puzzles.html"><i class="material-icons">extension</i><br>Puzzles</a>
+    <a href="tools.html"><i class="material-icons">build</i><br>Tools</a>
+    <a href="watch.html"><i class="material-icons">tv</i><br>Watch</a>
   </div>
 
+  <div id="toast">Link clicked!</div>
+
   <script>
-    // Dynamic Greeting based on time
-    const greeting = document.getElementById('greeting');
     const hour = new Date().getHours();
-    if (hour < 12) {
-      greeting.textContent = 'Good Morning ☀️';
-    } else if (hour < 18) {
-      greeting.textContent = 'Good Afternoon 🌞';
-    } else {
-      greeting.textContent = 'Good Evening 🌃️';
+greeting.textContent = hour < 12 ? 'Good Morning ☀️' : hour < 18 ? 'Good Afternoon 🌞' : 'Good Evening 🌃️';
+
+    async function fetchQuote() {
+  try {
+    const res = await fetch("https://api.quotable.io/random");
+    const data = await res.json();
+    document.getElementById("quote-box").textContent = `"${data.content}" — ${data.author}`;
+  } catch (err) {
+    document.getElementById("quote-box").textContent = "Padhle bhai! Life set ho jayegi.";
+  }
+}
+fetchQuote();
+
+fetchQuote(); // call on page load
+
+    const profileIcon = document.getElementById('profile-icon');
+    const profileDropdown = document.getElementById('profile-dropdown');
+    profileIcon.addEventListener('mouseenter', () => {
+      profileDropdown.classList.add('show');
+    });
+    profileIcon.addEventListener('mouseleave', () => {
+      setTimeout(() => {
+        if (!profileDropdown.matches(':hover')) {
+          profileDropdown.classList.remove('show');
+        }
+      }, 200);
+    });
+    profileDropdown.addEventListener('mouseleave', () => {
+      profileDropdown.classList.remove('show');
+    });
+
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('show');
     }
+
+    function toggleDarkMode() {
+      document.body.classList.toggle('light-mode');
+    }
+
+    document.querySelectorAll('.sidebar a.toastable').forEach(link => {
+      link.addEventListener('click', () => {
+        const toast = document.getElementById('toast');
+        toast.className = 'show';
+        setTimeout(() => { toast.className = toast.className.replace('show', ''); }, 2000);
+      });
+    });
   </script>
 </body>
 </html>
