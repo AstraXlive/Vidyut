@@ -31,20 +31,33 @@
       font-weight: bold;
       margin-bottom: 2rem;
     }
-    .subject {
+    #subjects {
       display: flex;
-      align-items: center;
-      justify-content: space-between;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1rem;
       width: 100%;
-      max-width: 500px;
+      max-width: 1000px;
+    }
+    .subject {
+      flex: 1 1 300px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
       padding: 1rem;
-      margin: 0.5rem 0;
       background-color: #1e1e1e;
       border-radius: 0.75rem;
+      box-sizing: border-box;
+      min-height: 100px;
     }
     .subject-name {
       font-size: 1.25rem;
-      flex: 1;
+    }
+    .subject-time-controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 0.75rem;
     }
     .controls {
       display: flex;
@@ -56,46 +69,96 @@
       color: #ffc107;
       font-size: 1.5rem;
     }
-    #add-subject, #add-todo {
+    .button-container {
+      display: flex;
+      justify-content: center;
+      gap: 0.75rem;
       margin-top: 1rem;
-      padding: 0.5rem 1rem;
+      flex-wrap: wrap;
+    }
+    #add-subject, #add-todo {
+      padding: 0.4rem 0.8rem;
       background-color: #ffc107;
       color: #000;
       border: none;
       border-radius: 0.5rem;
       cursor: pointer;
       font-weight: bold;
+      font-size: 0.9rem;
     }
     #chart-container {
       margin-top: 2rem;
       width: 100%;
       max-width: 500px;
     }
+    #todo-list {
+      margin-top: 2rem;
+      width: 100%;
+      max-width: 500px;
+      background-color: #1e1e1e;
+      padding: 1rem;
+      border-radius: 0.75rem;
+    }
+    .todo-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid #333;
+    }
+    .todo-item:last-child {
+      border-bottom: none;
+    }
+    .todo-left {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex: 1;
+    }
+    .todo-checkbox {
+      width: 20px;
+      height: 20px;
+    }
+    .todo-text {
+      flex: 1;
+      word-break: break-word;
+    }
+    .todo-checked {
+      text-decoration: line-through;
+      opacity: 0.6;
+    }
+    .todo-remove {
+      cursor: pointer;
+      color: #ff4c4c;
+    }
   </style>
 </head>
 <body>
-  <header>Tue, 22/04</header>
+  <header id="dateHeader"></header>
   <div class="total-timer" id="totalTimer">00:00:00</div>
-
   <div id="subjects"></div>
-
-  <button id="add-subject">+ Subject</button>
-  <button id="add-todo">+ To-do</button>
-
+  <div class="button-container">
+    <button id="add-subject">+ Subject</button>
+    <button id="add-todo">+ To-do</button>
+  </div>
   <div id="chart-container">
     <canvas id="studyChart"></canvas>
   </div>
+  <div id="todo-list"></div>
 
   <script>
-    let subjects = ["Maths", "Chemistry", "Physics"];
+    let subjects = JSON.parse(localStorage.getItem('subjects')) || ["Maths", "Chemistry", "Physics"];
+    let totalTime = JSON.parse(localStorage.getItem('totalTime')) || Object.fromEntries(subjects.map(s => [s, 0]));
+    let todos = JSON.parse(localStorage.getItem("todos")) || [];
     let activeSubject = null;
-    let timers = {};
     let intervals = {};
 
-    const totalTime = {
-      "Maths": 0,
-      "Chemistry": 0,
-      "Physics": 0
+    document.getElementById("dateHeader").textContent = new Date().toDateString();
+
+    const saveData = () => {
+      localStorage.setItem("subjects", JSON.stringify(subjects));
+      localStorage.setItem("totalTime", JSON.stringify(totalTime));
+      localStorage.setItem("todos", JSON.stringify(todos));
     };
 
     const formatTime = (seconds) => {
@@ -108,7 +171,6 @@
     const renderSubjects = () => {
       const container = document.getElementById('subjects');
       container.innerHTML = '';
-
       subjects.forEach((subject) => {
         const subjectDiv = document.createElement('div');
         subjectDiv.className = 'subject';
@@ -116,6 +178,9 @@
         const name = document.createElement('div');
         name.className = 'subject-name';
         name.textContent = subject;
+
+        const timeControls = document.createElement('div');
+        timeControls.className = 'subject-time-controls';
 
         const time = document.createElement('div');
         time.id = `time-${subject}`;
@@ -136,16 +201,31 @@
           const minutes = parseInt(prompt("Add minutes for " + subject + ":"), 10);
           if (!isNaN(minutes)) {
             totalTime[subject] += minutes * 60;
+            saveData();
+            updateTimers();
+          }
+        };
+
+        const deleteBtn = document.createElement('span');
+        deleteBtn.className = 'material-icons';
+        deleteBtn.textContent = 'delete';
+        deleteBtn.onclick = () => {
+          if (confirm(`Delete ${subject}?`)) {
+            subjects = subjects.filter(s => s !== subject);
+            delete totalTime[subject];
+            saveData();
+            renderSubjects();
             updateTimers();
           }
         };
 
         controls.appendChild(playPause);
         controls.appendChild(manualAdd);
+        controls.appendChild(deleteBtn);
+        timeControls.appendChild(time);
+        timeControls.appendChild(controls);
         subjectDiv.appendChild(name);
-        subjectDiv.appendChild(time);
-        subjectDiv.appendChild(controls);
-
+        subjectDiv.appendChild(timeControls);
         container.appendChild(subjectDiv);
       });
     };
@@ -159,9 +239,14 @@
         activeSubject = null;
         icon.textContent = 'play_arrow';
       } else {
+        if (activeSubject) {
+          const otherIcon = document.querySelector(`.material-icons.pause`);
+          if (otherIcon) otherIcon.textContent = 'play_arrow';
+        }
         activeSubject = subject;
         intervals[subject] = setInterval(() => {
           totalTime[subject]++;
+          saveData();
           updateTimers();
         }, 1000);
         icon.textContent = 'pause';
@@ -185,7 +270,7 @@
         datasets: [{
           label: 'Study Time (seconds)',
           data: subjects.map(s => totalTime[s]),
-          backgroundColor: ['#f44336', '#4caf50', '#2196f3'],
+          backgroundColor: ['#f44336', '#4caf50', '#2196f3', '#ff9800', '#9c27b0']
         }]
       },
       options: {
@@ -200,8 +285,52 @@
     });
 
     const updateChart = () => {
+      chart.data.labels = subjects;
       chart.data.datasets[0].data = subjects.map(s => totalTime[s]);
       chart.update();
+    };
+
+    const renderTodos = () => {
+      const container = document.getElementById("todo-list");
+      container.innerHTML = '<h3>To-do List</h3>';
+      todos.forEach((todo, index) => {
+        const item = document.createElement("div");
+        item.className = "todo-item";
+
+        const left = document.createElement("div");
+        left.className = "todo-left";
+
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.className = "todo-checkbox";
+        checkbox.checked = todo.checked;
+        checkbox.onchange = () => {
+          todos[index].checked = checkbox.checked;
+          saveData();
+          renderTodos();
+        };
+
+        const text = document.createElement("div");
+        text.className = "todo-text";
+        text.textContent = todo.text || todo;
+        if (todo.checked) text.classList.add("todo-checked");
+
+        left.appendChild(checkbox);
+        left.appendChild(text);
+
+        const remove = document.createElement("span");
+        remove.className = "material-icons todo-remove";
+        remove.textContent = "delete";
+        remove.onclick = () => {
+          todos.splice(index, 1);
+          saveData();
+          renderTodos();
+        };
+
+        item.appendChild(left);
+        item.appendChild(remove);
+        container.appendChild(item);
+      });
     };
 
     document.getElementById('add-subject').onclick = () => {
@@ -209,17 +338,24 @@
       if (newSub && !subjects.includes(newSub)) {
         subjects.push(newSub);
         totalTime[newSub] = 0;
+        saveData();
         renderSubjects();
         updateTimers();
       }
     };
 
     document.getElementById('add-todo').onclick = () => {
-      alert("TODO feature coming soon!");
+      const newTodo = prompt("Enter a new to-do:");
+      if (newTodo) {
+        todos.push({ text: newTodo, checked: false });
+        saveData();
+        renderTodos();
+      }
     };
 
     renderSubjects();
     updateTimers();
+    renderTodos();
   </script>
 </body>
 </html>
