@@ -395,7 +395,7 @@ fetchQuote();
       });
     });
   </script>
-  <script>
+<script>
   const firebaseConfig = {
     apiKey: "AIzaSyBK6ERxBeqllVW70VwMYs5Pss9oMGhShX8",
     authDomain: "vidyut-b88c5.firebaseapp.com",
@@ -405,64 +405,44 @@ fetchQuote();
     appId: "1:552051945759:web:79038ee244d63ba38bc02a"
   };
 
-  // Initialize Firebase
   firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
   const db = firebase.firestore();
   const messaging = firebase.messaging();
 
-  // Auth listener
   auth.onAuthStateChanged(async (user) => {
-  console.log("Auth user:", user);
+    console.log("Auth user:", user);
 
-  if (user) {
-    const permission = await Notification.requestPermission();
-    console.log("Notification permission:", permission);
-
-    if (permission === 'granted') {
+    if (user) {
       try {
-        const token = await messaging.getToken({
-          vapidKey: "BBobP2zMkskSfIVDwC1lEZig_Nr7zKHepTzn4xKNcytbFPO1XaPTwJNhU9b98EPaJ3JK_pd01TRq5yV98sIq9tA"
-        });
+        const permission = await Notification.requestPermission();
+        console.log("Notification permission:", permission);
 
-        console.log("FCM Token:", token);
+        if (permission === 'granted') {
+          const token = await messaging.getToken({
+            vapidKey: "BBobP2zMkskSfIVDwC1lEZig_Nr7zKHepTzn4xKNcytbFPO1XaPTwJNhU9b98EPaJ3JK_pd01TRq5yV98sIq9tA"
+          });
 
-        await db.collection("users").doc(user.uid).set({
-          fcmToken: token
-        }, { merge: true });
+          console.log("FCM Token:", token);
 
-        console.log("Token saved to Firestore");
+          await db.collection("users").doc(user.uid).set({
+            fcmToken: token
+          }, { merge: true });
+
+          console.log("Token saved to Firestore");
+        } else {
+          console.warn("Notifications were denied.");
+        }
       } catch (err) {
-        console.error("Error getting or saving token:", err);
-      }
-    } else {
-      console.warn("Notifications were denied.");
-    }
-  }
-});
-        // Save token to Firestore
-        db.collection("users").doc(user.uid).set({
-          fcmToken: token
-        }, { merge: true });
+        console.error("Error requesting notifications or saving token:", err);
       }
     }
   });
 
-  // Foreground message handler (optional)
   messaging.onMessage(payload => {
     console.log("Message received in foreground:", payload);
     alert(payload.notification.title + ": " + payload.notification.body);
   });
-  </script>
-  <script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('firebase-messaging-sw.js')
-      .then(function (registration) {
-        console.log('Service Worker registered with scope:', registration.scope);
-      }).catch(function (err) {
-        console.error('Service Worker registration failed:', err);
-      });
-  }
-  </script>
+</script>
 </body>
 </html>
