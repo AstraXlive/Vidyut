@@ -7,6 +7,313 @@
   <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script type="module">
+    // Import Firebase modules
+    import { initializeApp } from "firebase/app";
+    import { getDatabase, ref, set, onValue, update, remove } from "firebase/database";
+
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyBK6ERxBeqllVW70VwMYs5Pss9oMGhShX8",
+      authDomain: "vidyut-b88c5.firebaseapp.com",
+      projectId: "vidyut-b88c5",
+      storageBucket: "vidyut-b88c5.firebasestorage.app",
+      messagingSenderId: "552051945759",
+      appId: "1:552051945759:web:79038ee244d63ba38bc02a"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+
+    // Get the username from local storage
+    const username = localStorage.getItem('username');
+    const userRef = username ? ref(database, `users/${username}`) : null;
+
+    let subjects = [];
+    let totalTime = {};
+    let todos = [];
+    let activeSubject = null;
+    let intervals = {};
+    let chart; // Declare chart variable globally
+
+    document.getElementById("dateHeader").textContent = new Date().toDateString();
+
+    const saveDataToFirebase = () => {
+      if (userRef) {
+        set(userRef, {
+          subjects: subjects,
+          totalTime: totalTime,
+          todos: todos
+        });
+        console.log("Data saved to Firebase for user:", username);
+      } else {
+        console.warn("Username not found. Data not saved to Firebase.");
+        localStorage.setItem("subjects", JSON.stringify(subjects));
+        localStorage.setItem("totalTime", JSON.stringify(totalTime));
+        localStorage.setItem("todos", JSON.stringify(todos));
+      }
+    };
+
+    const saveDataToLocalStorage = () => {
+      localStorage.setItem("subjects", JSON.stringify(subjects));
+      localStorage.setItem("totalTime", JSON.stringify(totalTime));
+      localStorage.setItem("todos", JSON.stringify(todos));
+    };
+
+    const formatTime = (seconds) => {
+      const hrs = String(Math.floor(seconds / 3600)).padStart(2, '0');
+      const mins = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
+      const secs = String(seconds % 60).padStart(2, '0');
+      return `${hrs}:${mins}:${secs}`;
+    };
+
+    const renderSubjects = () => {
+      const container = document.getElementById('subjects');
+      container.innerHTML = '';
+      subjects.forEach((subject) => {
+        const subjectDiv = document.createElement('div');
+        subjectDiv.className = 'subject';
+
+        const name = document.createElement('div');
+        name.className = 'subject-name';
+        name.textContent = subject;
+
+        const timeControls = document.createElement('div');
+        timeControls.className = 'subject-time-controls';
+
+        const time = document.createElement('div');
+        time.id = `time-${subject}`;
+        time.textContent = formatTime(totalTime[subject] || 0);
+
+        const controls = document.createElement('div');
+        controls.className = 'controls';
+
+        const playPause = document.createElement('span');
+        playPause.className = 'material-icons';
+        playPause.textContent = intervals[subject] ? 'pause' : 'play_arrow';
+        playPause.onclick = () => toggleTimer(subject, playPause);
+
+        const manualAdd = document.createElement('span');
+        manualAdd.className = 'material-icons';
+        manualAdd.textContent = 'edit';
+        manualAdd.onclick = () => {
+          const minutes = parseInt(prompt("Add minutes for " + subject + ":"), 10);
+          if (!isNaN(minutes)) {
+            totalTime[subject] = (totalTime[subject] || 0) + minutes * 60;
+            saveDataToFirebase();
+            updateTimers();
+          }
+        };
+
+        const deleteBtn = document.createElement('span');
+        deleteBtn.className = 'material-icons';
+        deleteBtn.textContent = 'delete';
+        deleteBtn.onclick = () => {
+          if (confirm(`Delete ${subject}?`)) {
+            subjects = subjects.filter(s => s !== subject);
+            delete totalTime[subject];
+            saveDataToFirebase();
+            renderSubjects();
+            updateTimers();
+          }
+        };
+
+        controls.appendChild(playPause);
+        controls.appendChild(manualAdd);
+        controls.appendChild(deleteBtn);
+        timeControls.appendChild(time);
+        timeControls.appendChild(controls);
+        subjectDiv.appendChild(name);
+        subjectDiv.appendChild(timeControls);
+        container.appendChild(subjectDiv);
+      });
+    };
+
+    const toggleTimer = (subject, icon) => {
+      if (activeSubject && activeSubject !== subject) return alert("Only one subject at a time!");
+
+      if (intervals[subject]) {
+        clearInterval(intervals[subject]);
+        delete intervals[subject];
+        activeSubject = null;
+        icon.textContent = 'play_arrow';
+      } else {
+        if (activeSubject && intervals[activeSubject]) {
+          clearInterval(intervals[activeSubject]);
+          const otherIcon = document.querySelector(`#subjects .subject:has(.subject-name:contains('${activeSubject}')) .controls .material-icons:first-child`);
+          if (otherIcon) otherIcon.textContent = 'play_arrow';
+          delete intervals[activeSubject];
+        }
+        activeSubject = subject;
+        intervals[subject] = setInterval(() => {
+          totalTime[subject] = (totalTime[subject] || 0) + 1;
+          saveDataToFirebase();
+          updateTimers();
+        }, 1000);
+        icon.textContent = 'pause';
+      }
+    };
+
+    const updateTimers = () => {
+      subjects.forEach((subject) => {
+        const timeElement = document.getElementById(`time-${subject}`);
+        if (timeElement) {
+          timeElement.textContent = formatTime(totalTime[subject] || 0);
+        }
+      });
+      const total = subjects.reduce((acc, s) => acc + (totalTime[s] || 0), 0);
+      document.getElementById('totalTimer').textContent = formatTime(total);
+      updateChart();
+    };
+
+    const initChart = () => {
+      const ctx = document.getElementById('studyChart');
+      chart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+          labels: subjects,
+          datasets: [{
+            label: 'Study Time (seconds)',
+            data: subjects.map(s => totalTime[s] || 0),
+            backgroundColor: ['#f44336', '#4caf50', '#2196f3', '#ff9800', '#9c27b0']
+          }]
+        },
+        options: {
+          plugins: {
+            legend: {
+              labels: {
+                color: '#fff'
+              }
+            }
+          }
+        }
+      });
+    };
+
+    const updateChart = () => {
+      if (chart) {
+        chart.data.labels = subjects;
+        chart.data.datasets[0].data = subjects.map(s => totalTime[s] || 0);
+        chart.update();
+      }
+    };
+
+    const renderTodos = () => {
+      const container = document.getElementById("todo-list");
+      container.innerHTML = '<h3>To-do List</h3>';
+      todos.forEach((todo, index) => {
+        const item = document.createElement("div");
+        item.className = "todo-item";
+
+        const left = document.createElement("div");
+        left.className = "todo-left";
+
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.className = "todo-checkbox";
+        checkbox.checked = todo.checked;
+        checkbox.onchange = () => {
+          todos[index].checked = checkbox.checked;
+          saveDataToFirebase();
+          renderTodos();
+        };
+
+        const text = document.createElement("div");
+        text.className = "todo-text";
+        text.textContent = todo.text || todo;
+        if (todo.checked) text.classList.add("todo-checked");
+
+        left.appendChild(checkbox);
+        left.appendChild(text);
+
+        const remove = document.createElement("span");
+        remove.className = "material-icons todo-remove";
+        remove.textContent = "delete";
+        remove.onclick = () => {
+          todos.splice(index, 1);
+          saveDataToFirebase();
+          renderTodos();
+        };
+
+        item.appendChild(left);
+        item.appendChild(remove);
+        container.appendChild(item);
+      });
+    };
+
+    document.getElementById('add-subject').onclick = () => {
+      const newSub = prompt("Enter new subject name:");
+      if (newSub && !subjects.includes(newSub)) {
+        subjects.push(newSub);
+        totalTime[newSub] = 0;
+        saveDataToFirebase();
+        renderSubjects();
+        updateTimers();
+      }
+    };
+
+    document.getElementById('add-todo').onclick = () => {
+      const newTodo = prompt("Enter a new to-do:");
+      if (newTodo) {
+        todos.push({ text: newTodo, checked: false });
+        saveDataToFirebase();
+        renderTodos();
+      }
+    };
+
+    // Load data from Firebase or local storage
+    const loadData = () => {
+      if (userRef) {
+        onValue(userRef, (snapshot) => {
+          const data = snapshot.val();
+          if (data) {
+            subjects = data.subjects || [];
+            totalTime = data.totalTime || {};
+            todos = data.todos || [];
+            renderSubjects();
+            updateTimers();
+            renderTodos();
+            if (!chart) {
+              initChart();
+            } else {
+              updateChart();
+            }
+            console.log("Data loaded from Firebase for user:", username);
+          } else {
+            // No data in Firebase, load from local storage
+            const localSubjects = JSON.parse(localStorage.getItem('subjects')) || ["Maths", "Chemistry", "Physics"];
+            const localTotalTime = JSON.parse(localStorage.getItem('totalTime')) || Object.fromEntries(localSubjects.map(s => [s, 0]));
+            const localTodos = JSON.parse(localStorage.getItem("todos")) || [];
+            subjects = localSubjects;
+            totalTime = localTotalTime;
+            todos = localTodos;
+            renderSubjects();
+            updateTimers();
+            renderTodos();
+            initChart();
+            console.log("No data in Firebase, loaded from local storage.");
+          }
+        });
+      } else {
+        // Username not available, load from local storage only
+        const localSubjects = JSON.parse(localStorage.getItem('subjects')) || ["Maths", "Chemistry", "Physics"];
+        const localTotalTime = JSON.parse(localStorage.getItem('totalTime')) || Object.fromEntries(localSubjects.map(s => [s, 0]));
+        const localTodos = JSON.parse(localStorage.getItem("todos")) || [];
+        subjects = localSubjects;
+        totalTime = localTotalTime;
+        todos = localTodos;
+        renderSubjects();
+        updateTimers();
+        renderTodos();
+        initChart();
+        console.warn("Username not found. Loaded data from local storage.");
+      }
+    };
+
+    // Initialize
+    loadData();
+  </script>
   <style>
     body {
       margin: 0;
@@ -135,227 +442,3 @@
 </head>
 <body>
   <header id="dateHeader"></header>
-  <div class="total-timer" id="totalTimer">00:00:00</div>
-  <div id="subjects"></div>
-  <div class="button-container">
-    <button id="add-subject">+ Subject</button>
-    <button id="add-todo">+ To-do</button>
-  </div>
-  <div id="chart-container">
-    <canvas id="studyChart"></canvas>
-  </div>
-  <div id="todo-list"></div>
-
-  <script>
-    let subjects = JSON.parse(localStorage.getItem('subjects')) || ["Maths", "Chemistry", "Physics"];
-    let totalTime = JSON.parse(localStorage.getItem('totalTime')) || Object.fromEntries(subjects.map(s => [s, 0]));
-    let todos = JSON.parse(localStorage.getItem("todos")) || [];
-    let activeSubject = null;
-    let intervals = {};
-
-    document.getElementById("dateHeader").textContent = new Date().toDateString();
-
-    const saveData = () => {
-      localStorage.setItem("subjects", JSON.stringify(subjects));
-      localStorage.setItem("totalTime", JSON.stringify(totalTime));
-      localStorage.setItem("todos", JSON.stringify(todos));
-    };
-
-    const formatTime = (seconds) => {
-      const hrs = String(Math.floor(seconds / 3600)).padStart(2, '0');
-      const mins = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
-      const secs = String(seconds % 60).padStart(2, '0');
-      return `${hrs}:${mins}:${secs}`;
-    };
-
-    const renderSubjects = () => {
-      const container = document.getElementById('subjects');
-      container.innerHTML = '';
-      subjects.forEach((subject) => {
-        const subjectDiv = document.createElement('div');
-        subjectDiv.className = 'subject';
-
-        const name = document.createElement('div');
-        name.className = 'subject-name';
-        name.textContent = subject;
-
-        const timeControls = document.createElement('div');
-        timeControls.className = 'subject-time-controls';
-
-        const time = document.createElement('div');
-        time.id = `time-${subject}`;
-        time.textContent = formatTime(totalTime[subject]);
-
-        const controls = document.createElement('div');
-        controls.className = 'controls';
-
-        const playPause = document.createElement('span');
-        playPause.className = 'material-icons';
-        playPause.textContent = 'play_arrow';
-        playPause.onclick = () => toggleTimer(subject, playPause);
-
-        const manualAdd = document.createElement('span');
-        manualAdd.className = 'material-icons';
-        manualAdd.textContent = 'edit';
-        manualAdd.onclick = () => {
-          const minutes = parseInt(prompt("Add minutes for " + subject + ":"), 10);
-          if (!isNaN(minutes)) {
-            totalTime[subject] += minutes * 60;
-            saveData();
-            updateTimers();
-          }
-        };
-
-        const deleteBtn = document.createElement('span');
-        deleteBtn.className = 'material-icons';
-        deleteBtn.textContent = 'delete';
-        deleteBtn.onclick = () => {
-          if (confirm(`Delete ${subject}?`)) {
-            subjects = subjects.filter(s => s !== subject);
-            delete totalTime[subject];
-            saveData();
-            renderSubjects();
-            updateTimers();
-          }
-        };
-
-        controls.appendChild(playPause);
-        controls.appendChild(manualAdd);
-        controls.appendChild(deleteBtn);
-        timeControls.appendChild(time);
-        timeControls.appendChild(controls);
-        subjectDiv.appendChild(name);
-        subjectDiv.appendChild(timeControls);
-        container.appendChild(subjectDiv);
-      });
-    };
-
-    const toggleTimer = (subject, icon) => {
-      if (activeSubject && activeSubject !== subject) return alert("Only one subject at a time!");
-
-      if (intervals[subject]) {
-        clearInterval(intervals[subject]);
-        intervals[subject] = null;
-        activeSubject = null;
-        icon.textContent = 'play_arrow';
-      } else {
-        if (activeSubject) {
-          const otherIcon = document.querySelector(`.material-icons.pause`);
-          if (otherIcon) otherIcon.textContent = 'play_arrow';
-        }
-        activeSubject = subject;
-        intervals[subject] = setInterval(() => {
-          totalTime[subject]++;
-          saveData();
-          updateTimers();
-        }, 1000);
-        icon.textContent = 'pause';
-      }
-    };
-
-    const updateTimers = () => {
-      subjects.forEach((subject) => {
-        document.getElementById(`time-${subject}`).textContent = formatTime(totalTime[subject]);
-      });
-      const total = subjects.reduce((acc, s) => acc + totalTime[s], 0);
-      document.getElementById('totalTimer').textContent = formatTime(total);
-      updateChart();
-    };
-
-    const ctx = document.getElementById('studyChart');
-    const chart = new Chart(ctx, {
-      type: 'pie',
-      data: {
-        labels: subjects,
-        datasets: [{
-          label: 'Study Time (seconds)',
-          data: subjects.map(s => totalTime[s]),
-          backgroundColor: ['#f44336', '#4caf50', '#2196f3', '#ff9800', '#9c27b0']
-        }]
-      },
-      options: {
-        plugins: {
-          legend: {
-            labels: {
-              color: '#fff'
-            }
-          }
-        }
-      }
-    });
-
-    const updateChart = () => {
-      chart.data.labels = subjects;
-      chart.data.datasets[0].data = subjects.map(s => totalTime[s]);
-      chart.update();
-    };
-
-    const renderTodos = () => {
-      const container = document.getElementById("todo-list");
-      container.innerHTML = '<h3>To-do List</h3>';
-      todos.forEach((todo, index) => {
-        const item = document.createElement("div");
-        item.className = "todo-item";
-
-        const left = document.createElement("div");
-        left.className = "todo-left";
-
-        const checkbox = document.createElement("input");
-        checkbox.type = "checkbox";
-        checkbox.className = "todo-checkbox";
-        checkbox.checked = todo.checked;
-        checkbox.onchange = () => {
-          todos[index].checked = checkbox.checked;
-          saveData();
-          renderTodos();
-        };
-
-        const text = document.createElement("div");
-        text.className = "todo-text";
-        text.textContent = todo.text || todo;
-        if (todo.checked) text.classList.add("todo-checked");
-
-        left.appendChild(checkbox);
-        left.appendChild(text);
-
-        const remove = document.createElement("span");
-        remove.className = "material-icons todo-remove";
-        remove.textContent = "delete";
-        remove.onclick = () => {
-          todos.splice(index, 1);
-          saveData();
-          renderTodos();
-        };
-
-        item.appendChild(left);
-        item.appendChild(remove);
-        container.appendChild(item);
-      });
-    };
-
-    document.getElementById('add-subject').onclick = () => {
-      const newSub = prompt("Enter new subject name:");
-      if (newSub && !subjects.includes(newSub)) {
-        subjects.push(newSub);
-        totalTime[newSub] = 0;
-        saveData();
-        renderSubjects();
-        updateTimers();
-      }
-    };
-
-    document.getElementById('add-todo').onclick = () => {
-      const newTodo = prompt("Enter a new to-do:");
-      if (newTodo) {
-        todos.push({ text: newTodo, checked: false });
-        saveData();
-        renderTodos();
-      }
-    };
-
-    renderSubjects();
-    updateTimers();
-    renderTodos();
-  </script>
-</body>
-</html>
