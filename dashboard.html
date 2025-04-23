@@ -335,7 +335,7 @@
   const db = getFirestore(app);
   const messaging = getMessaging(app);
 
-  
+  const savedUsername = localStorage.getItem("vidyutUsername");
     try {
       const permission = await Notification.requestPermission();
       document.getElementById("notif-toast").style.display = "none";
