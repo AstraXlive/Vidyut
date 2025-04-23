@@ -8,129 +8,19 @@
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    body {
-      margin: 0;
-      font-family: 'Roboto', sans-serif;
-      background-color: #0f0f0f;
-      color: #f5f5f5;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 1rem;
-    }
-    header {
-      width: 100%;
-      text-align: center;
-      font-size: 1.5rem;
-      font-weight: bold;
-      padding: 1rem;
-      color: #ffc107;
-    }
-    .total-timer {
-      font-size: 3rem;
-      font-weight: bold;
-      margin-bottom: 2rem;
-    }
-    #subjects {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 1rem;
-      width: 100%;
-      max-width: 1000px;
-    }
-    .subject {
-      flex: 1 1 300px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      padding: 1rem;
-      background-color: #1e1e1e;
-      border-radius: 0.75rem;
-      box-sizing: border-box;
-      min-height: 100px;
-    }
-    .subject-name {
-      font-size: 1.25rem;
-    }
-    .subject-time-controls {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-top: 0.75rem;
-    }
-    .controls {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    .material-icons {
-      cursor: pointer;
-      color: #ffc107;
-      font-size: 1.5rem;
-    }
-    .button-container {
-      display: flex;
-      justify-content: center;
-      gap: 0.75rem;
-      margin-top: 1rem;
-      flex-wrap: wrap;
-    }
-    #add-subject, #add-todo {
-      padding: 0.4rem 0.8rem;
-      background-color: #ffc107;
-      color: #000;
-      border: none;
-      border-radius: 0.5rem;
-      cursor: pointer;
-      font-weight: bold;
-      font-size: 0.9rem;
-    }
-    #chart-container {
-      margin-top: 2rem;
-      width: 100%;
-      max-width: 500px;
-    }
-    #todo-list {
-      margin-top: 2rem;
-      width: 100%;
-      max-width: 500px;
-      background-color: #1e1e1e;
-      padding: 1rem;
-      border-radius: 0.75rem;
-    }
-    .todo-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0.5rem 0;
-      border-bottom: 1px solid #333;
-    }
-    .todo-item:last-child {
-      border-bottom: none;
-    }
-    .todo-left {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      flex: 1;
-    }
-    .todo-checkbox {
-      width: 20px;
-      height: 20px;
-    }
-    .todo-text {
-      flex: 1;
-      word-break: break-word;
-    }
-    .todo-checked {
-      text-decoration: line-through;
-      opacity: 0.6;
-    }
-    .todo-remove {
-      cursor: pointer;
-      color: #ff4c4c;
-    }
+    /* same styles as before */
+    body { background-color: #0f0f0f; color: #f5f5f5; font-family: 'Roboto', sans-serif; margin: 0; padding: 1rem; display: flex; flex-direction: column; align-items: center; }
+    header { color: #ffc107; font-weight: bold; padding: 1rem; text-align: center; font-size: 1.5rem; width: 100%; }
+    .total-timer { font-size: 3rem; font-weight: bold; margin-bottom: 2rem; }
+    .button-container { margin-top: 1rem; display: flex; gap: 0.75rem; flex-wrap: wrap; justify-content: center; }
+    #subjects, #todo-list, #chart-container { width: 100%; max-width: 1000px; margin-top: 2rem; }
+    .subject { background-color: #1e1e1e; padding: 1rem; border-radius: 0.75rem; margin-bottom: 1rem; display: flex; flex-direction: column; }
+    .subject-time-controls { display: flex; justify-content: space-between; align-items: center; margin-top: 0.75rem; }
+    .controls { display: flex; gap: 0.5rem; }
+    .material-icons { color: #ffc107; cursor: pointer; }
+    #add-subject, #add-todo { padding: 0.4rem 0.8rem; background-color: #ffc107; color: #000; border: none; border-radius: 0.5rem; font-weight: bold; cursor: pointer; font-size: 0.9rem; }
+    .todo-item { background-color: #1e1e1e; padding: 0.5rem; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; }
+    .todo-text.todo-checked { text-decoration: line-through; opacity: 0.6; }
   </style>
 </head>
 <body>
@@ -141,147 +31,193 @@
     <button id="add-subject">+ Subject</button>
     <button id="add-todo">+ To-do</button>
   </div>
-  <div id="chart-container">
-    <canvas id="studyChart"></canvas>
-  </div>
+  <div id="chart-container"><canvas id="studyChart"></canvas></div>
   <div id="todo-list"></div>
 
-  <script>
-    let subjects = JSON.parse(localStorage.getItem('subjects')) || ["Maths", "Chemistry", "Physics"];
-    let totalTime = JSON.parse(localStorage.getItem('totalTime')) || Object.fromEntries(subjects.map(s => [s, 0]));
-    let todos = JSON.parse(localStorage.getItem("todos")) || [];
+  <!-- Firebase SDKs -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+    import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, addDoc, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBK6ERxBeqllVW70VwMYs5Pss9oMGhShX8",
+      authDomain: "vidyut-b88c5.firebaseapp.com",
+      projectId: "vidyut-b88c5",
+      storageBucket: "vidyut-b88c5.firebasestorage.app",
+      messagingSenderId: "552051945759",
+      appId: "1:552051945759:web:79038ee244d63ba38bc02a"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const username = localStorage.getItem("username");
+    if (!username) alert("Username not found. Please log in again.");
+
+    const today = new Date().toISOString().split("T")[0];
+    const timerRef = doc(db, "users", username, "timers", today);
+    const todosRef = collection(db, "users", username, "todos");
+
+    let subjects = [];
+    let totalTime = {};
+    let todos = [];
     let activeSubject = null;
     let intervals = {};
 
-    document.getElementById("dateHeader").textContent = new Date().toDateString();
+    const saveToFirebase = async () => {
+      await setDoc(timerRef, { subjects, totalTime });
+    };
 
-    const saveData = () => {
+    const fetchFromFirebase = async () => {
+      const snapshot = await getDoc(timerRef);
+      if (snapshot.exists()) {
+        const data = snapshot.data();
+        subjects = data.subjects || [];
+        totalTime = data.totalTime || {};
+      } else {
+        subjects = ["Maths", "Chemistry", "Physics"];
+        totalTime = Object.fromEntries(subjects.map(s => [s, 0]));
+        saveToFirebase();
+      }
+      const todosSnap = await getDocs(todosRef);
+      todos = todosSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      saveToLocal();
+    };
+
+    const saveToLocal = () => {
       localStorage.setItem("subjects", JSON.stringify(subjects));
       localStorage.setItem("totalTime", JSON.stringify(totalTime));
       localStorage.setItem("todos", JSON.stringify(todos));
     };
 
-    const formatTime = (seconds) => {
-      const hrs = String(Math.floor(seconds / 3600)).padStart(2, '0');
-      const mins = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
-      const secs = String(seconds % 60).padStart(2, '0');
-      return `${hrs}:${mins}:${secs}`;
+    const updateTimers = () => {
+      subjects.forEach(s => {
+        const el = document.getElementById(`time-${s}`);
+        if (el) el.textContent = formatTime(totalTime[s]);
+      });
+      const total = subjects.reduce((sum, s) => sum + totalTime[s], 0);
+      document.getElementById("totalTimer").textContent = formatTime(total);
+      updateChart();
     };
 
+    const formatTime = sec => `${String(Math.floor(sec/3600)).padStart(2,"0")}:${String(Math.floor(sec%3600/60)).padStart(2,"0")}:${String(sec%60).padStart(2,"0")}`;
+
     const renderSubjects = () => {
-      const container = document.getElementById('subjects');
-      container.innerHTML = '';
-      subjects.forEach((subject) => {
-        const subjectDiv = document.createElement('div');
-        subjectDiv.className = 'subject';
-
-        const name = document.createElement('div');
-        name.className = 'subject-name';
-        name.textContent = subject;
-
-        const timeControls = document.createElement('div');
-        timeControls.className = 'subject-time-controls';
-
-        const time = document.createElement('div');
-        time.id = `time-${subject}`;
-        time.textContent = formatTime(totalTime[subject]);
-
-        const controls = document.createElement('div');
-        controls.className = 'controls';
-
-        const playPause = document.createElement('span');
-        playPause.className = 'material-icons';
-        playPause.textContent = 'play_arrow';
-        playPause.onclick = () => toggleTimer(subject, playPause);
-
-        const manualAdd = document.createElement('span');
-        manualAdd.className = 'material-icons';
-        manualAdd.textContent = 'edit';
-        manualAdd.onclick = () => {
-          const minutes = parseInt(prompt("Add minutes for " + subject + ":"), 10);
-          if (!isNaN(minutes)) {
-            totalTime[subject] += minutes * 60;
-            saveData();
-            updateTimers();
-          }
-        };
-
-        const deleteBtn = document.createElement('span');
-        deleteBtn.className = 'material-icons';
-        deleteBtn.textContent = 'delete';
-        deleteBtn.onclick = () => {
-          if (confirm(`Delete ${subject}?`)) {
-            subjects = subjects.filter(s => s !== subject);
-            delete totalTime[subject];
-            saveData();
-            renderSubjects();
-            updateTimers();
-          }
-        };
-
-        controls.appendChild(playPause);
-        controls.appendChild(manualAdd);
-        controls.appendChild(deleteBtn);
-        timeControls.appendChild(time);
-        timeControls.appendChild(controls);
-        subjectDiv.appendChild(name);
-        subjectDiv.appendChild(timeControls);
-        container.appendChild(subjectDiv);
+      const container = document.getElementById("subjects");
+      container.innerHTML = "";
+      subjects.forEach(subject => {
+        const div = document.createElement("div");
+        div.className = "subject";
+        div.innerHTML = `
+          <div class="subject-name">${subject}</div>
+          <div class="subject-time-controls">
+            <div id="time-${subject}">${formatTime(totalTime[subject])}</div>
+            <div class="controls">
+              <span class="material-icons" onclick="toggleTimer('${subject}', this)">play_arrow</span>
+              <span class="material-icons" onclick="addManualTime('${subject}')">edit</span>
+              <span class="material-icons" onclick="deleteSubject('${subject}')">delete</span>
+            </div>
+          </div>`;
+        container.appendChild(div);
       });
     };
 
-    const toggleTimer = (subject, icon) => {
-      if (activeSubject && activeSubject !== subject) return alert("Only one subject at a time!");
+    const renderTodos = () => {
+      const container = document.getElementById("todo-list");
+      container.innerHTML = '<h3>To-do List</h3>';
+      todos.forEach(todo => {
+        const item = document.createElement("div");
+        item.className = "todo-item";
+        item.innerHTML = `
+          <div>
+            <input type="checkbox" ${todo.checked ? "checked" : ""} onchange="toggleTodo('${todo.id}', this.checked)">
+            <span class="todo-text ${todo.checked ? 'todo-checked' : ''}">${todo.text}</span>
+          </div>
+          <span class="material-icons" onclick="deleteTodo('${todo.id}')">delete</span>`;
+        container.appendChild(item);
+      });
+    };
 
+    window.toggleTimer = (subject, icon) => {
+      if (activeSubject && activeSubject !== subject) return alert("Only one subject at a time!");
       if (intervals[subject]) {
         clearInterval(intervals[subject]);
         intervals[subject] = null;
         activeSubject = null;
-        icon.textContent = 'play_arrow';
+        icon.textContent = "play_arrow";
       } else {
-        if (activeSubject) {
-          const otherIcon = document.querySelector(`.material-icons.pause`);
-          if (otherIcon) otherIcon.textContent = 'play_arrow';
-        }
         activeSubject = subject;
         intervals[subject] = setInterval(() => {
           totalTime[subject]++;
-          saveData();
           updateTimers();
+          saveToFirebase();
         }, 1000);
-        icon.textContent = 'pause';
+        icon.textContent = "pause";
       }
     };
 
-    const updateTimers = () => {
-      subjects.forEach((subject) => {
-        document.getElementById(`time-${subject}`).textContent = formatTime(totalTime[subject]);
-      });
-      const total = subjects.reduce((acc, s) => acc + totalTime[s], 0);
-      document.getElementById('totalTimer').textContent = formatTime(total);
-      updateChart();
+    window.addManualTime = subject => {
+      const mins = parseInt(prompt("Add minutes for " + subject), 10);
+      if (!isNaN(mins)) {
+        totalTime[subject] += mins * 60;
+        updateTimers();
+        saveToFirebase();
+      }
     };
 
-    const ctx = document.getElementById('studyChart');
-    const chart = new Chart(ctx, {
-      type: 'pie',
-      data: {
-        labels: subjects,
-        datasets: [{
-          label: 'Study Time (seconds)',
-          data: subjects.map(s => totalTime[s]),
-          backgroundColor: ['#f44336', '#4caf50', '#2196f3', '#ff9800', '#9c27b0']
-        }]
-      },
-      options: {
-        plugins: {
-          legend: {
-            labels: {
-              color: '#fff'
-            }
-          }
-        }
+    window.deleteSubject = subject => {
+      if (confirm(`Delete ${subject}?`)) {
+        subjects = subjects.filter(s => s !== subject);
+        delete totalTime[subject];
+        updateTimers();
+        renderSubjects();
+        saveToFirebase();
       }
+    };
+
+    window.toggleTodo = async (id, checked) => {
+      await updateDoc(doc(todosRef, id), { checked });
+      todos.find(t => t.id === id).checked = checked;
+      renderTodos();
+    };
+
+    window.deleteTodo = async id => {
+      await deleteDoc(doc(todosRef, id));
+      todos = todos.filter(t => t.id !== id);
+      renderTodos();
+    };
+
+    document.getElementById("add-subject").onclick = () => {
+      const newSub = prompt("Enter new subject:");
+      if (newSub && !subjects.includes(newSub)) {
+        subjects.push(newSub);
+        totalTime[newSub] = 0;
+        renderSubjects();
+        updateTimers();
+        saveToFirebase();
+      }
+    };
+
+    document.getElementById("add-todo").onclick = async () => {
+      const newTodo = prompt("Enter a new to-do:");
+      if (newTodo) {
+        const docRef = await addDoc(todosRef, { text: newTodo, checked: false });
+        todos.push({ id: docRef.id, text: newTodo, checked: false });
+        renderTodos();
+      }
+    };
+
+    document.getElementById("dateHeader").textContent = new Date().toDateString();
+    fetchFromFirebase().then(() => {
+      renderSubjects();
+      renderTodos();
+      updateTimers();
+    });
+
+    const chart = new Chart(document.getElementById("studyChart"), {
+      type: "pie",
+      data: { labels: subjects, datasets: [{ label: "Study Time", data: subjects.map(s => totalTime[s]), backgroundColor: ["#f44336", "#4caf50", "#2196f3", "#ff9800", "#9c27b0"] }] },
+      options: { plugins: { legend: { labels: { color: "#fff" } } } }
     });
 
     const updateChart = () => {
@@ -289,73 +225,6 @@
       chart.data.datasets[0].data = subjects.map(s => totalTime[s]);
       chart.update();
     };
-
-    const renderTodos = () => {
-      const container = document.getElementById("todo-list");
-      container.innerHTML = '<h3>To-do List</h3>';
-      todos.forEach((todo, index) => {
-        const item = document.createElement("div");
-        item.className = "todo-item";
-
-        const left = document.createElement("div");
-        left.className = "todo-left";
-
-        const checkbox = document.createElement("input");
-        checkbox.type = "checkbox";
-        checkbox.className = "todo-checkbox";
-        checkbox.checked = todo.checked;
-        checkbox.onchange = () => {
-          todos[index].checked = checkbox.checked;
-          saveData();
-          renderTodos();
-        };
-
-        const text = document.createElement("div");
-        text.className = "todo-text";
-        text.textContent = todo.text || todo;
-        if (todo.checked) text.classList.add("todo-checked");
-
-        left.appendChild(checkbox);
-        left.appendChild(text);
-
-        const remove = document.createElement("span");
-        remove.className = "material-icons todo-remove";
-        remove.textContent = "delete";
-        remove.onclick = () => {
-          todos.splice(index, 1);
-          saveData();
-          renderTodos();
-        };
-
-        item.appendChild(left);
-        item.appendChild(remove);
-        container.appendChild(item);
-      });
-    };
-
-    document.getElementById('add-subject').onclick = () => {
-      const newSub = prompt("Enter new subject name:");
-      if (newSub && !subjects.includes(newSub)) {
-        subjects.push(newSub);
-        totalTime[newSub] = 0;
-        saveData();
-        renderSubjects();
-        updateTimers();
-      }
-    };
-
-    document.getElementById('add-todo').onclick = () => {
-      const newTodo = prompt("Enter a new to-do:");
-      if (newTodo) {
-        todos.push({ text: newTodo, checked: false });
-        saveData();
-        renderTodos();
-      }
-    };
-
-    renderSubjects();
-    updateTimers();
-    renderTodos();
   </script>
 </body>
 </html>
