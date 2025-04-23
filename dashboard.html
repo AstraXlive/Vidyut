@@ -309,17 +309,17 @@
   text-align: center;
 ">
   <p style="margin: 0 0 10px;">Enable daily JEE reminders?</p>
-  <button onclick="enableNotifications()" style="margin-right: 10px; padding: 6px 12px;">Yes, please</button>
+  <button onclick="autoAskForPermission()">Yes, please</button>
   <button onclick="dismissToast()" style="padding: 6px 12px;">Maybe later</button>
   </div>
 
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js";
   import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
 
   const firebaseConfig = {
     apiKey: "AIzaSyBK6ERxBeqllVW70VwMYs5Pss9oMGhShX8",
@@ -331,16 +331,11 @@
   };
 
   const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
   const db = getFirestore(app);
   const messaging = getMessaging(app);
 
-  window.enableNotifications = async function () {
-    const savedUsername = localStorage.getItem("vidyutUsername");
-    if (!savedUsername) {
-      alert("You're not logged in.");
-      return;
-    }
-
+  
     try {
       const permission = await Notification.requestPermission();
       document.getElementById("notif-toast").style.display = "none";
@@ -466,50 +461,7 @@ fetchQuote();
       });
     });
   </script>
-<script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyBK6ERxBeqllVW70VwMYs5Pss9oMGhShX8",
-    authDomain: "vidyut-b88c5.firebaseapp.com",
-    projectId: "vidyut-b88c5",
-    storageBucket: "vidyut-b88c5.firebasestorage.app",
-    messagingSenderId: "552051945759",
-    appId: "1:552051945759:web:79038ee244d63ba38bc02a"
-  };
 
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  const db = firebase.firestore();
-  const messaging = firebase.messaging();
-
-  const savedUsername = localStorage.getItem("vidyutUsername");
-if (savedUsername) {
-  // manually treat this as the UID
-  Notification.requestPermission().then(async permission => {
-    console.log("Notification permission:", permission);
-    if (permission === 'granted') {
-      const token = await messaging.getToken({
-        vapidKey: "BBobP2zMkskSfIVDwC1lEZig_Nr7zKHepTzn4xKNcytbFPO1XaPTwJNhU9b98EPaJ3JK_pd01TRq5yV98sIq9tA"
-      });
-      console.log("FCM Token:", token);
-
-      await db.collection("users").doc(savedUsername).set({
-        fcmToken: token
-      }, { merge: true });
-
-      console.log("Token saved to Firestore!");
-    }
-  }).catch(err => {
-    console.error("Error requesting notifications or saving token:", err);
-  });
-} else {
-  console.warn("Notifications were denied.");
-  };
-
-  messaging.onMessage(payload => {
-    console.log("Message received in foreground:", payload);
-    alert(payload.notification.title + ": " + payload.notification.body);
-  });
-</script>
     <script>
   window.addEventListener("DOMContentLoaded", () => {
     const savedUsername = localStorage.getItem("vidyutUsername");
@@ -525,21 +477,17 @@ if (savedUsername) {
     localStorage.setItem("notifPrompted", "true");
   }
 
-  async function enableNotifications() {
-  const savedUsername = localStorage.getItem("vidyutUsername");
-  if (!savedUsername) {
-    alert("You're not logged in.");
-    return;
-  }
+  
 
+async function autoAskForPermission() {
   try {
+    const savedUsername = localStorage.getItem("vidyutUsername");
     const permission = await Notification.requestPermission();
     console.log("Notification permission:", permission);
     document.getElementById("notif-toast").style.display = "none";
     localStorage.setItem("notifPrompted", "true");
 
     if (permission === "granted") {
-      // FIX: Manually register service worker first
       const swReg = await navigator.serviceWorker.register('firebase-messaging-sw.js');
 
       const token = await messaging.getToken({
@@ -560,7 +508,8 @@ if (savedUsername) {
   } catch (err) {
     console.error("Notification error:", err);
   }
-      }
+}
+  
     </script>
 </body>
 </html>
