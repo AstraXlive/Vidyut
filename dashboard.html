@@ -410,27 +410,25 @@ fetchQuote();
   const db = firebase.firestore();
   const messaging = firebase.messaging();
 
-  auth.onAuthStateChanged(async (user) => {
-    console.log("Auth user:", user);
+  const savedUsername = localStorage.getItem("vidyutUsername");
+if (savedUsername) {
+  // manually treat this as the UID
+  Notification.requestPermission().then(async permission => {
+    console.log("Notification permission:", permission);
+    if (permission === 'granted') {
+      const token = await messaging.getToken({
+        vapidKey: "BBobP2zMkskSfIVDwC1lEZig_Nr7zKHepTzn4xKNcytbFPO1XaPTwJNhU9b98EPaJ3JK_pd01TRq5yV98sIq9tA"
+      });
+      console.log("FCM Token:", token);
 
-    if (user) {
-      try {
-        const permission = await Notification.requestPermission();
-        console.log("Notification permission:", permission);
+      await db.collection("users").doc(savedUsername).set({
+        fcmToken: token
+      }, { merge: true });
 
-        if (permission === 'granted') {
-          const token = await messaging.getToken({
-            vapidKey: "BBobP2zMkskSfIVDwC1lEZig_Nr7zKHepTzn4xKNcytbFPO1XaPTwJNhU9b98EPaJ3JK_pd01TRq5yV98sIq9tA"
-          });
-
-          console.log("FCM Token:", token);
-
-          await db.collection("users").doc(user.uid).set({
-            fcmToken: token
-          }, { merge: true });
-
-          console.log("Token saved to Firestore");
-        } else {
+      console.log("Token saved to Firestore!");
+    }
+  });
+  } else {
           console.warn("Notifications were denied.");
         }
       } catch (err) {
