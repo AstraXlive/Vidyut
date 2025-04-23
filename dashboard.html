@@ -316,8 +316,59 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js"></script>
-  
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js";
+  import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBK6ERxBeqllVW70VwMYs5Pss9oMGhShX8",
+    authDomain: "vidyut-b88c5.firebaseapp.com",
+    projectId: "vidyut-b88c5",
+    storageBucket: "vidyut-b88c5.appspot.com",
+    messagingSenderId: "552051945759",
+    appId: "1:552051945759:web:79038ee244d63ba38bc02a"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const messaging = getMessaging(app);
+
+  window.enableNotifications = async function () {
+    const savedUsername = localStorage.getItem("vidyutUsername");
+    if (!savedUsername) {
+      alert("You're not logged in.");
+      return;
+    }
+
+    try {
+      const permission = await Notification.requestPermission();
+      document.getElementById("notif-toast").style.display = "none";
+      localStorage.setItem("notifPrompted", "true");
+
+      if (permission === 'granted') {
+        const swReg = await navigator.serviceWorker.register('firebase-messaging-sw.js');
+
+        const token = await getToken(messaging, {
+          vapidKey: "BBobP2zMkskSfIVDwC1lEZig_Nr7zKHepTzn4xKNcytbFPO1XaPTwJNhU9b98EPaJ3JK_pd01TRq5yV98sIq9tA",
+          serviceWorkerRegistration: swReg
+        });
+
+        console.log("FCM Token:", token);
+
+        await setDoc(doc(db, "users", savedUsername), {
+          fcmToken: token
+        }, { merge: true });
+
+        alert("Notifications enabled! You’ll now get daily JEE reminders.");
+      } else {
+        alert("Notifications blocked. Enable them in browser settings.");
+      }
+    } catch (err) {
+      console.error("Notification error:", err);
+    }
+  };
+</script>
   <script>
     const hour = new Date().getHours();
 greeting.textContent = hour < 12 ? 'Good Morning ☀️' : hour < 18 ? 'Good Afternoon 🌞' : 'Good Evening 🌃️';
