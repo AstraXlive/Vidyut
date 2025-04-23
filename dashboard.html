@@ -458,7 +458,8 @@ if (savedUsername) {
     console.log("Message received in foreground:", payload);
     alert(payload.notification.title + ": " + payload.notification.body);
   });
-  <script>
+</script>
+    <script>
   window.addEventListener("DOMContentLoaded", () => {
     const savedUsername = localStorage.getItem("vidyutUsername");
     const alreadyPrompted = localStorage.getItem("notifPrompted");
@@ -505,7 +506,6 @@ if (savedUsername) {
       console.error("Notification error:", err);
     }
   }
-</script>
-</script>
+    </script>
 </body>
 </html>
