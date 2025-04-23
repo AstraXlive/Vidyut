@@ -475,37 +475,41 @@ if (savedUsername) {
   }
 
   async function enableNotifications() {
-    const savedUsername = localStorage.getItem("vidyutUsername");
-    if (!savedUsername) {
-      alert("You're not logged in.");
-      return;
-    }
-
-    try {
-      const permission = await Notification.requestPermission();
-      console.log("Notification permission:", permission);
-      document.getElementById("notif-toast").style.display = "none";
-      localStorage.setItem("notifPrompted", "true");
-
-      if (permission === "granted") {
-        const token = await messaging.getToken({
-          vapidKey: "BBobP2zMkskSfIVDwC1lEZig_Nr7zKHepTzn4xKNcytbFPO1XaPTwJNhU9b98EPaJ3JK_pd01TRq5yV98sIq9tA"
-        });
-
-        console.log("FCM Token:", token);
-
-        await db.collection("users").doc(savedUsername).set({
-          fcmToken: token
-        }, { merge: true });
-
-        alert("Notifications enabled! You’ll now get daily JEE reminders.");
-      } else {
-        alert("Notifications are blocked. You can allow them from browser settings later.");
-      }
-    } catch (err) {
-      console.error("Notification error:", err);
-    }
+  const savedUsername = localStorage.getItem("vidyutUsername");
+  if (!savedUsername) {
+    alert("You're not logged in.");
+    return;
   }
+
+  try {
+    const permission = await Notification.requestPermission();
+    console.log("Notification permission:", permission);
+    document.getElementById("notif-toast").style.display = "none";
+    localStorage.setItem("notifPrompted", "true");
+
+    if (permission === "granted") {
+      // FIX: Manually register service worker first
+      const swReg = await navigator.serviceWorker.register('firebase-messaging-sw.js');
+
+      const token = await messaging.getToken({
+        vapidKey: "BBobP2zMkskSfIVDwC1lEZig_Nr7zKHepTzn4xKNcytbFPO1XaPTwJNhU9b98EPaJ3JK_pd01TRq5yV98sIq9tA",
+        serviceWorkerRegistration: swReg
+      });
+
+      console.log("FCM Token:", token);
+
+      await db.collection("users").doc(savedUsername).set({
+        fcmToken: token
+      }, { merge: true });
+
+      alert("Notifications enabled! You’ll now get daily JEE reminders.");
+    } else {
+      alert("Notifications are blocked. You can allow them from browser settings later.");
+    }
+  } catch (err) {
+    console.error("Notification error:", err);
+  }
+      }
     </script>
 </body>
 </html>
