@@ -293,6 +293,11 @@
 
   <div id="toast">Link clicked!</div>
 
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js"></script>
+  
   <script>
     const hour = new Date().getHours();
 greeting.textContent = hour < 12 ? 'Good Morning ☀️' : hour < 18 ? 'Good Afternoon 🌞' : 'Good Evening 🌃️';
@@ -389,6 +394,47 @@ fetchQuote();
         setTimeout(() => { toast.className = toast.className.replace('show', ''); }, 2000);
       });
     });
+  </script>
+  <script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyBK6ERxBeqllVW70VwMYs5Pss9oMGhShX8",
+    authDomain: "vidyut-b88c5.firebaseapp.com",
+    projectId: "vidyut-b88c5",
+    storageBucket: "vidyut-b88c5.firebasestorage.app",
+    messagingSenderId: "552051945759",
+    appId: "1:552051945759:web:79038ee244d63ba38bc02a"
+  };
+
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+  const messaging = firebase.messaging();
+
+  // Auth listener
+  auth.onAuthStateChanged(async (user) => {
+    if (user) {
+      const permission = await Notification.requestPermission();
+      if (permission === 'granted') {
+        const token = await messaging.getToken({
+          vapidKey: "YOUR_VAPID_KEY_HERE"
+        });
+
+        console.log("FCM Token:", token);
+
+        // Save token to Firestore
+        db.collection("users").doc(user.uid).set({
+          fcmToken: token
+        }, { merge: true });
+      }
+    }
+  });
+
+  // Foreground message handler (optional)
+  messaging.onMessage(payload => {
+    console.log("Message received in foreground:", payload);
+    alert(payload.notification.title + ": " + payload.notification.body);
+  });
   </script>
 </body>
 </html>
