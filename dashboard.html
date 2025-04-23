@@ -413,15 +413,33 @@ fetchQuote();
 
   // Auth listener
   auth.onAuthStateChanged(async (user) => {
-    if (user) {
-      const permission = await Notification.requestPermission();
-      if (permission === 'granted') {
+  console.log("Auth user:", user);
+
+  if (user) {
+    const permission = await Notification.requestPermission();
+    console.log("Notification permission:", permission);
+
+    if (permission === 'granted') {
+      try {
         const token = await messaging.getToken({
           vapidKey: "BBobP2zMkskSfIVDwC1lEZig_Nr7zKHepTzn4xKNcytbFPO1XaPTwJNhU9b98EPaJ3JK_pd01TRq5yV98sIq9tA"
         });
 
         console.log("FCM Token:", token);
 
+        await db.collection("users").doc(user.uid).set({
+          fcmToken: token
+        }, { merge: true });
+
+        console.log("Token saved to Firestore");
+      } catch (err) {
+        console.error("Error getting or saving token:", err);
+      }
+    } else {
+      console.warn("Notifications were denied.");
+    }
+  }
+});
         // Save token to Firestore
         db.collection("users").doc(user.uid).set({
           fcmToken: token
