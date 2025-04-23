@@ -427,10 +427,12 @@ if (savedUsername) {
 
       console.log("Token saved to Firestore!");
     }
+  }).catch(err => {
+    console.error("Error requesting notifications or saving token:", err);
   });
-  } else {
-          console.warn("Notifications were denied.");
-        }
+} else {
+  console.warn("Notifications were denied.");
+  }
       } catch (err) {
         console.error("Error requesting notifications or saving token:", err);
       }
