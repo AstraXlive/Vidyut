@@ -441,15 +441,7 @@ body.light-mode {
     localStorage.setItem("notifPrompted", "true");
   }
 
-  // Show prompt if needed
-  if (Notification.permission === "default" && !localStorage.getItem("notifPrompted")) {
-    document.getElementById("notif-toast").style.display = "block";
-  }
-  window.addEventListener("DOMContentLoaded", () => {
-  if (Notification.permission === "default" && !localStorage.getItem("notifPrompted")) {
-    document.getElementById("notif-toast").style.display = "block";
-  }
-});
+  
 </script>
   <script>
 const hour = new Date().getHours();
