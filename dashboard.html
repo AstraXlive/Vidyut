@@ -250,6 +250,16 @@ body.light-mode {
     transform: translateY(0);
   }
       }
+    html, body {
+  overscroll-behavior-y: contain;
+  overflow: hidden;
+  height: 100%;
+}
+#scroll-container {
+  height: 100%;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
   </style>
 
 </head>
@@ -290,6 +300,7 @@ body.light-mode {
     <a href="support.html" class="toastable"><i class="material-icons">help_outline</i> Help & Support</a>
   </div>
 
+  <div id="scroll-container">
   <div class="section">
     <h2 id="greeting">Good Day</h2>
     <div class="quote-box" id="quote-box"></div>
@@ -586,5 +597,6 @@ async function autoAskForPermission() {
     document.addEventListener('touchmove', touchmoveHandler, { passive: false });
   }
   </script>
+  </div> 
 </body>
 </html>
