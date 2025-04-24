@@ -234,18 +234,28 @@
   </style>
 </head>
 <body>
-  <div class="navbar">
+<div class="navbar">
     <div class="left">Vidyut ⚡</div>
     <div class="right">
-      <i class="material-icons" onclick="toggleDarkMode()">light_mode</i>
-      <i class="material-icons" onclick="toggleSidebar()">menu</i>
-      <i class="material-icons" id="profile-icon">person</i>
-      <div class="dropdown" id="profile-dropdown">
-        <a href="settings.html"><i class="material-icons">settings</i> Profile Settings</a>
-        <a href="progress.html"><i class="material-icons">insights</i> My Progress</a>
-        <a href="themes.html"><i class="material-icons">palette</i> Themes</a>
-        <a href="index.html"><i class="material-icons">exit_to_app</i> Logout</a>
-      </div>
+        <i class="material-icons" onclick="toggleDarkMode()">light_mode</i>
+        <i class="material-icons" onclick="toggleSidebar()">menu</i>
+        <i class="material-icons" id="profile-icon">person</i>
+        <div class="dropdown" id="profile-dropdown">
+            <a href="settings.html"><i class="material-icons">settings</i> Profile Settings</a>
+            <a href="progress.html"><i class="material-icons">insights</i> My Progress</a>
+            <a href="themes.html"><i class="material-icons">palette</i> Themes</a>
+            <button onclick="logout()"><i class="material-icons">exit_to_app</i> Logout</button> <!-- Change this to button -->
+        </div>
+    </div>
+</div>
+
+<script>
+    function logout() {
+        localStorage.removeItem("vidyutLoggedIn");
+        localStorage.removeItem("vidyutUsername");
+        window.location.href = "vidyut_auth.html";  // Redirect to the login page
+    }
+</script>
     </div>
   </div>
 
@@ -313,7 +323,12 @@
   <button onclick="dismissToast()" style="padding: 6px 12px;">Maybe later</button>
   </div>
 
-  
+
+  <script>
+    if (localStorage.getItem("vidyutLoggedIn") !== "true") {
+        window.location.href = "vidyut_auth.html";
+    }
+  </script>
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js";
