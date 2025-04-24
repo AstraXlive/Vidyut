@@ -252,21 +252,15 @@ body.light-mode {
       }
   </style>
   <style>
-    html, body {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  overscroll-behavior-y: none; /* This disables swipe refresh */
-}
-
-.main-content {
-  height: calc(100vh - [header height] - [footer height]);
+    .main-content {
+  height: calc(100vh - 72px - 88px); /* adjust as per your navbar/footer height */
   overflow-y: auto;
-  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS/Android */
+  padding-bottom: 120px; /* just in case */
     }
   </style>
 </head>
 <body>
+  <div class="main-content">
    
 <div class="navbar">
     <div class="left">Vidyut ⚡</div>
@@ -569,6 +563,6 @@ async function autoAskForPermission() {
 }
   
     </script>
-
+</div>
 </body>
 </html>
