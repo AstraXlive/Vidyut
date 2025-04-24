@@ -6,6 +6,7 @@
   <title>Vidyut Dashboard</title>
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital@1&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg-color: #121212;
@@ -122,14 +123,19 @@
       text-align: center;
     }
     .quote-box {
-      border-left: 4px solid var(--highlight);
-      background-color: var(--quote-bg);
-      font-size: 1.2rem;
-      font-family: 'Georgia', serif;
-      border-radius: 10px;
-      padding: 1rem;
-      margin: 1rem auto;
-      max-width: 90%;
+  border-left: 4px solid var(--highlight);
+  background-color: var(--quote-bg);
+  font-size: 1.6rem;
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-weight: 400;
+  line-height: 1.6;
+  border-radius: 10px;
+  padding: 1.2rem;
+  margin: 1.5rem auto;
+  max-width: 90%;
+  text-align: center;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.15);
     }
     .progress-box, .streak-box {
       border: 1px solid var(--highlight);
@@ -448,7 +454,7 @@ document.getElementById("greeting").textContent = greetingText;
 function fetchQuote() {
   const quoteText = document.getElementById("quote-box");  // Corrected
   const randomIndex = Math.floor(Math.random() * quotes.length);
-  quoteText.innerText = quotes[randomIndex];
+  quoteText.innerText = `“${quotes[randomIndex]}”`;
 }
 
 fetchQuote();
