@@ -124,12 +124,6 @@ body.light-mode {
     }
     .quote-box {
   background: rgba(255, 255, 255, 0.08);
-  @media (min-width: 768px) {
-  .quote-box {
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-  }
-  }
   border: 1px solid rgba(255, 255, 255, 0.15);
   font-family: 'DM Serif Display', serif;
   font-style: italic;
@@ -142,17 +136,19 @@ body.light-mode {
   text-align: center;
   box-shadow:
     0 4px 30px rgba(0, 0, 0, 0.5),
-    inset 0 0 0.5px rgba(255, 255, 255, 0.15); /* inner frosty line */
+    inset 0 0 0.5px rgba(255, 255, 255, 0.15);
   text-shadow: 0 1px 4px rgba(255, 255, 255, 0.08);
   opacity: 0;
-  transform: translateY(10px);
   animation: fadeInSoft 0.4s ease forwards;
-will-change: opacity;
-      transform: translateZ(0);
-      @keyframes fadeInSoft {
-  from { opacity: 0; }
-  to { opacity: 1; }
-      }
+  will-change: opacity;
+  transform: translateZ(0);
+}
+
+@media (min-width: 768px) {
+  .quote-box {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
     }
     .progress-box, .streak-box {
       border: 1px solid var(--highlight);
@@ -272,7 +268,7 @@ will-change: opacity;
   -webkit-overflow-scrolling: touch;
   padding-bottom: 2rem; /* so footer has breathing room */
   will-change: transform;
-  scroll-behaviour: smooth;
+  scroll-behavior: smooth;
   transform: translateZ(0);
       }  
   </style>
@@ -341,6 +337,7 @@ will-change: opacity;
     </div>
     <div class="footer">Made with love by Shubham at AstraX</div>
   </div>
+  </div>     
 
   <div class="bottom-nav">
     <a href="dashboard.html"><i class="material-icons">home</i><br>Home</a>
@@ -611,7 +608,6 @@ async function autoAskForPermission() {
     document.addEventListener('touchstart', touchstartHandler, { passive: false });
     document.addEventListener('touchmove', touchmoveHandler, { passive: false });
   }
-  </script>
-  </div> 
+  </script> 
 </body>
 </html>
