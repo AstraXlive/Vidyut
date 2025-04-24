@@ -391,7 +391,6 @@ body.light-mode {
   import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
   import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-
   const firebaseConfig = {
     apiKey: "AIzaSyBK6ERxBeqllVW70VwMYs5Pss9oMGhShX8",
     authDomain: "vidyut-b88c5.firebaseapp.com",
@@ -407,32 +406,36 @@ body.light-mode {
   const messaging = getMessaging(app);
 
   const savedUsername = localStorage.getItem("vidyutUsername");
-    try {
-      const permission = await Notification.requestPermission();
-      document.getElementById("notif-toast").style.display = "none";
-      localStorage.setItem("notifPrompted", "true");
 
-      if (permission === 'granted') {
-        const swReg = await navigator.serviceWorker.register('firebase-messaging-sw.js');
+  if (Notification.permission === "default" && !localStorage.getItem("notifPrompted")) {
+    (async () => {
+      try {
+        const permission = await Notification.requestPermission();
+        document.getElementById("notif-toast").style.display = "none";
+        localStorage.setItem("notifPrompted", "true");
 
-        const token = await getToken(messaging, {
-          vapidKey: "BBobP2zMkskSfIVDwC1lEZig_Nr7zKHepTzn4xKNcytbFPO1XaPTwJNhU9b98EPaJ3JK_pd01TRq5yV98sIq9tA",
-          serviceWorkerRegistration: swReg
-        });
+        if (permission === 'granted') {
+          const swReg = await navigator.serviceWorker.register('firebase-messaging-sw.js');
+          const token = await getToken(messaging, {
+            vapidKey: "BBobP2zMkskSfIVDwC1lEZig_Nr7zKHepTzn4xKNcytbFPO1XaPTwJNhU9b98EPaJ3JK_pd01TRq5yV98sIq9tA",
+            serviceWorkerRegistration: swReg
+          });
 
-        console.log("FCM Token:", token);
+          console.log("FCM Token:", token);
 
-        await setDoc(doc(db, "users", savedUsername), {
-          fcmToken: token
-        }, { merge: true });
+          await setDoc(doc(db, "users", savedUsername), {
+            fcmToken: token
+          }, { merge: true });
 
-        alert("Notifications enabled! You’ll now get daily JEE reminders.");
-      } else {
-        alert("Notifications blocked. Enable them in browser settings.");
+          alert("Notifications enabled! You’ll now get daily reminders.");
+        } else {
+          alert("Notifications blocked. Enable them in browser settings.");
+        }
+      } catch (err) {
+        console.error("Notification error:", err);
       }
-    } catch (err) {
-      console.error("Notification error:", err);
-    };
+    })();
+  }
 </script>
   <script>
 const hour = new Date().getHours();
