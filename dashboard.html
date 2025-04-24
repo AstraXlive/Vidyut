@@ -250,16 +250,18 @@ body.light-mode {
     transform: translateY(0);
   }
       }
-    html, body {
-  overscroll-behavior-y: contain;
+  html, body {
+  height: 100%;
   overflow: hidden;
-  height: 100%;
+  overscroll-behavior-y: contain;
 }
+
 #scroll-container {
-  height: 100%;
+  height: calc(100% - 120px); /* adjust this based on your fixed navbar + bottom nav */
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-}
+  padding-bottom: 2rem; /* so footer has breathing room */
+      }  
   </style>
 
 </head>
