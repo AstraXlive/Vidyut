@@ -496,7 +496,9 @@ function fetchQuote() {
   quoteText.innerText = `“${quotes[randomIndex]}”`;
 }
 
-fetchQuote();
+window.addEventListener("DOMContentLoaded", () => {
+  fetchQuote();
+});
 
     const profileIcon = document.getElementById('profile-icon');
     const profileDropdown = document.getElementById('profile-dropdown');
