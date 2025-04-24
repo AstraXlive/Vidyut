@@ -407,34 +407,43 @@ body.light-mode {
 
   const savedUsername = localStorage.getItem("vidyutUsername");
 
-  if (Notification.permission === "default" && !localStorage.getItem("notifPrompted")) {
-    (async () => {
-      try {
-        const permission = await Notification.requestPermission();
-        document.getElementById("notif-toast").style.display = "none";
-        localStorage.setItem("notifPrompted", "true");
+  // Attach global functions for toast button to work
+  window.autoAskForPermission = async function () {
+    try {
+      const permission = await Notification.requestPermission();
+      document.getElementById("notif-toast").style.display = "none";
+      localStorage.setItem("notifPrompted", "true");
 
-        if (permission === 'granted') {
-          const swReg = await navigator.serviceWorker.register('firebase-messaging-sw.js');
-          const token = await getToken(messaging, {
-            vapidKey: "BBobP2zMkskSfIVDwC1lEZig_Nr7zKHepTzn4xKNcytbFPO1XaPTwJNhU9b98EPaJ3JK_pd01TRq5yV98sIq9tA",
-            serviceWorkerRegistration: swReg
-          });
+      if (permission === 'granted') {
+        const swReg = await navigator.serviceWorker.register('firebase-messaging-sw.js');
+        const token = await getToken(messaging, {
+          vapidKey: "BBobP2zMkskSfIVDwC1lEZig_Nr7zKHepTzn4xKNcytbFPO1XaPTwJNhU9b98EPaJ3JK_pd01TRq5yV98sIq9tA",
+          serviceWorkerRegistration: swReg
+        });
 
-          console.log("FCM Token:", token);
+        console.log("FCM Token:", token);
 
-          await setDoc(doc(db, "users", savedUsername), {
-            fcmToken: token
-          }, { merge: true });
+        await setDoc(doc(db, "users", savedUsername), {
+          fcmToken: token
+        }, { merge: true });
 
-          alert("Notifications enabled! You’ll now get daily reminders.");
-        } else {
-          alert("Notifications blocked. Enable them in browser settings.");
-        }
-      } catch (err) {
-        console.error("Notification error:", err);
+        alert("Notifications enabled! You’ll now get daily JEE reminders.");
+      } else {
+        alert("Notifications are blocked. You can allow them from browser settings later.");
       }
-    })();
+    } catch (err) {
+      console.error("Notification error:", err);
+    }
+  }
+
+  window.dismissToast = function () {
+    document.getElementById("notif-toast").style.display = "none";
+    localStorage.setItem("notifPrompted", "true");
+  }
+
+  // Show prompt if needed
+  if (Notification.permission === "default" && !localStorage.getItem("notifPrompted")) {
+    document.getElementById("notif-toast").style.display = "block";
   }
 </script>
   <script>
@@ -557,44 +566,6 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  function dismissToast() {
-    document.getElementById("notif-toast").style.display = "none";
-    localStorage.setItem("notifPrompted", "true");
-  }
-
-  
-
-async function autoAskForPermission() {
-  try {
-    const savedUsername = localStorage.getItem("vidyutUsername");
-    const permission = await Notification.requestPermission();
-    console.log("Notification permission:", permission);
-    document.getElementById("notif-toast").style.display = "none";
-    localStorage.setItem("notifPrompted", "true");
-
-    if (permission === "granted") {
-      const swReg = await navigator.serviceWorker.register('firebase-messaging-sw.js');
-
-      const token = await messaging.getToken({
-        vapidKey: "BBobP2zMkskSfIVDwC1lEZig_Nr7zKHepTzn4xKNcytbFPO1XaPTwJNhU9b98EPaJ3JK_pd01TRq5yV98sIq9tA",
-        serviceWorkerRegistration: swReg
-      });
-
-      console.log("FCM Token:", token);
-
-      await db.collection("users").doc(savedUsername).set({
-        fcmToken: token
-      }, { merge: true });
-
-      alert("Notifications enabled! You’ll now get daily JEE reminders.");
-    } else {
-      alert("Notifications are blocked. You can allow them from browser settings later.");
-    }
-  } catch (err) {
-    console.error("Notification error:", err);
-  }
-}
-  
     </script>
   <script>
   // Only apply on mobile devices
