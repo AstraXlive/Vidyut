@@ -104,6 +104,10 @@
     <button class="cta-btn" onclick="window.location.href='vidyut_auth.html'">Get Started</button>
 
     <script>
+        // Auto-redirect if already logged in
+if (localStorage.getItem("vidyutLoggedIn") === "true") {
+    window.location.replace("dashboard.html");
+        }
         let deferredPrompt;
 
         window.addEventListener("beforeinstallprompt", (e) => {
