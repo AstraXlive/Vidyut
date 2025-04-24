@@ -445,6 +445,11 @@ body.light-mode {
   if (Notification.permission === "default" && !localStorage.getItem("notifPrompted")) {
     document.getElementById("notif-toast").style.display = "block";
   }
+  window.addEventListener("DOMContentLoaded", () => {
+  if (Notification.permission === "default" && !localStorage.getItem("notifPrompted")) {
+    document.getElementById("notif-toast").style.display = "block";
+  }
+});
 </script>
   <script>
 const hour = new Date().getHours();
@@ -556,17 +561,6 @@ window.addEventListener("DOMContentLoaded", () => {
     });
   </script>
 
-    <script>
-  window.addEventListener("DOMContentLoaded", () => {
-    const savedUsername = localStorage.getItem("vidyutUsername");
-    const alreadyPrompted = localStorage.getItem("notifPrompted");
-
-    if (savedUsername && Notification.permission === "default" && !alreadyPrompted) {
-      document.getElementById("notif-toast").style.display = "block";
-    }
-  });
-
-    </script>
   <script>
   // Only apply on mobile devices
   if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
