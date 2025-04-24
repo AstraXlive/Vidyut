@@ -439,16 +439,7 @@ body.light-mode {
     document.getElementById("notif-toast").style.display = "none";
     localStorage.setItem("notifPrompted", "true");
   }
-  const token = await getToken(messaging, {
-  vapidKey: "...",
-  serviceWorkerRegistration: swReg
-});
-
-if (token) {
-  console.log("Token retrieved:", token);
-} else {
-  console.warn("No token. Permission denied or service worker issue.");
-  }
+  
 
   
 </script>
