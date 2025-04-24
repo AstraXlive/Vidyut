@@ -253,12 +253,17 @@ body.light-mode {
   </style>
   <style>
     html, body {
-  height: 100%;
   margin: 0;
-  overflow: hidden; /* Stop body from scrolling */
+  padding: 0;
+  height: 100%;
+  overscroll-behavior-y: none; /* This disables swipe refresh */
 }
 
-
+.main-content {
+  height: calc(100vh - [header height] - [footer height]);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS/Android */
+    }
   </style>
 </head>
 <body>
