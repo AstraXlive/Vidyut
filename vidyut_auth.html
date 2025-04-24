@@ -147,16 +147,13 @@
             }
 
             localStorage.setItem("vidyutUsername", username);
+            // Save login status to localStorage
+localStorage.setItem("vidyutLoggedIn", "true");
             window.location.href = "dashboard.html";
         }
 
         document.getElementById("login-button").addEventListener("click", login);
-        firebase.auth().onAuthStateChanged((user) => {
-  if (user) {
-    console.log("User logged in:", user.uid);
-    window.location.href = "dashboard.html";
-  }
-});
+        
     </script>
 </body>
 </html>
