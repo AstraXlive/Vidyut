@@ -380,8 +380,19 @@
 </script>
   <script>
     const hour = new Date().getHours();
-greeting.textContent = hour < 12 ? 'Good Morning ☀️' : hour < 18 ? 'Good Afternoon 🌞' : 'Good Evening 🌃️';
+const hour = new Date().getHours();
+const savedUsername = localStorage.getItem("vidyutUsername");
+let greetingText = "";
 
+if (hour < 12) {
+  greetingText = `Hey ${savedUsername}, good morning 🌄!`;
+} else if (hour >= 12 && hour < 16.5) {
+  greetingText = `Hey ${savedUsername}, good afternoon ☀️!`;
+} else {
+  greetingText = `Hey ${savedUsername}, good evening 🌆!`;
+}
+
+document.getElementById("greeting").textContent = greetingText;
     const quotes = [
   "Stop scrolling. Start studying.",
   "Your future IITian self is watching. Don’t disappoint.",
